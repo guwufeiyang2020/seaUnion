@@ -1,0 +1,81 @@
+{
+  "root": true,
+  "env": {
+    "node": true
+  },
+  "extends": ["plugin:vue/essential", "eslint:recommended", "airbnb-base"],
+  "rules": {
+    "indent": [
+      "error",
+      2,
+      {
+        "SwitchCase": 1
+      }
+    ],
+    "no-alert": "off",
+    "no-console": "off",
+    "no-cond-assign": "off",
+    "no-tabs": "off",
+    "no-use-before-define": "off",
+    "no-param-reassign": "off",
+    "global-require": "off",
+    "import/no-dynamic-require": "off",
+    "import/no-extraneous-dependencies": "off",
+    "quote-props": ["error", "consistent"],
+    "max-len": [
+      "error",
+      {
+        "code": 5000
+      }
+    ],
+    "import/prefer-default-export": "off",
+    "import/no-unresolved": "off",
+    "import/extensions": "off",
+    "no-unused-expressions": "off",
+    "no-underscore-dangle": [
+      "error",
+      {
+        "allowAfterThis": true
+      }
+    ],
+    "linebreak-style": [0, "error", "windows"],
+    "class-methods-use-this": "off",
+    "prefer-destructuring": [
+      "error",
+      {
+        "object": true,
+        "array": false
+      }
+    ],
+    "comma-dangle": [
+      1,
+      {
+        // 对象字面量项尾不能有逗号
+        "objects": "ignore",
+        "arrays": "ignore",
+        "imports": "ignore",
+        "exports": "ignore",
+        "functions": "ignore"
+      }
+    ],
+    "prefer-const": "off",
+    "no-else-return": [
+      "error",
+      {
+        "allowElseIf": false
+      }
+    ],
+    "consistent-return": "off",
+    "no-unused-vars": "off",
+    "space-before-function-paren": "off",
+    "object-curly-newline": "off",
+    "no-plusplus": "off",
+    "no-undef": "off",
+    "no-lonely-if": "off",
+    "import/no-cycle": "off",
+    "vue/return-in-computed-property": "off"
+  },
+  "parserOptions": {
+    "parser": "babel-eslint"
+  }
+}

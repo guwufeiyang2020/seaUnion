@@ -1,0 +1,15 @@
+.select-ship-wrapper {
+    /deep/ .el-dialog__header {
+        border-bottom: 1px solid #ddd;
+    }
+    .dialog-footer {
+        text-align: right;
+        .el-button--primary {
+            background: #005BAC;
+            border: 1px solid #005BAC;
+        }
+    }
+    .el-form-item {
+        margin-bottom: 16px;
+    }
+}
