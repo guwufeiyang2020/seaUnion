@@ -1,11 +1,11 @@
 <template>
 	<div class="nav-menu">
 		<el-menu-item v-for="navMenu in noChildren" :index="navMenu.id" :key="navMenu.id">
-			<span slot="title" @click="clickMenu(navMenu)">{{navMenu.name}}</span>
+			<p slot="title" @click.stop="clickMenu(navMenu)">{{navMenu.name}}</p>
 		</el-menu-item>
 		<el-submenu v-for="navMenu in hasChildren" :key="navMenu.id" :index="navMenu.id">
-			<template slot="title" @click="clickMenu(navMenu)">
-				<span>{{navMenu.name}}</span>
+			<template slot="title" @click.stop="clickMenu(navMenu)">
+				<p>{{navMenu.name}}</p>
 			</template>
 			<nav-menu :navMenus="navMenu.children"></nav-menu>
 		</el-submenu>
@@ -31,14 +31,25 @@ export default {
     }
   },
   data() {
-    return {};
+    return {
+      refresh: false
+    };
   },
+
   methods: {
     clickMenu(menu) {
-      this.$store.commit('SET_MENU', menu);
-      this.$router.push({
-        path: menu.link
-      });
+      localStorage.setItem('jumpType', '1');
+      if (menu.app_type === 'link') {
+        this.$router.push({
+          path: menu.link
+        });
+      } else if (menu.app_type === 'information' || menu.app_type === 'workflow') {
+        // ◊ﬂ∆ΩÃ®≈‰÷√
+        let { spaceId } = AY.getSpaceInfoOfCurrentPage();
+        this.$router.push({
+          path: `/appList/${menu.app_type}/${menu.app_id}/${spaceId}`
+        });
+      }
     }
   }
 };

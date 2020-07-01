@@ -1,5 +1,5 @@
 <template>
-	<div style="width: 100%; height: 100%" ref="echart">echart</div>
+	<div style="width: 100%; height: 100%" id="echart">echart</div>
 </template>
 
 <script>
@@ -97,9 +97,17 @@ export default {
       this.initChartData();
       if (this.echart) {
         this.echart.setOption(this.options);
+        // 设置表格的点击事件进行路由的切换
+        this.echart.on('click', (param) => {
+          console.log('弹窗');
+        });
       } else {
-        this.echart = echarts.init(this.$refs.echart);
+        this.echart = echarts.init(document.getElementById('echart'));
         this.echart.setOption(this.options);
+        // 设置表格的点击事件进行路由的切换
+        this.echart.on('click', (param) => {
+          console.log('弹窗');
+        });
       }
     },
     initChartData() {

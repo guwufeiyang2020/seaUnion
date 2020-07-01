@@ -70,87 +70,87 @@ import SIdentify from './identify.vue';
 import { encryptDes } from '../../assets/js/utils/des';
 
 export default {
-	name: 'Login',
-	components: {
-		SIdentify
-	},
-	data() {
-		// 验证码自定义验证规则
-		const validateVerifycode = (rule, value, callback) => {
-			let newVal = value.toLowerCase();
-			let identifyStr = this.identifyCode.toLowerCase();
-			if (newVal === '') {
-				callback(new Error('请输入验证码'));
-			} else if (newVal !== identifyStr) {
-				callback(new Error('验证码不正确!'));
-			} else {
-				callback();
-			}
-		};
-		return {
-			loginForm: {
-				username: '',
-				password: '',
-				verifycode: ''
-			},
-			loginType: 'hs',
-			identifyCodes: '1234567890ABCDEFGHIGKLMNOPQRSTUVWXYZ',
-			identifyCode: '',
-			rememberPassword: true,
-			loading: false,
-			loginRules: {
-				username: [{ required: true, trigger: 'blur', message: '账号不能为空' }],
-				password: [
-					{ required: true, message: '请输入密码', trigger: 'blur' },
-					{ min: 6, message: '密码长度最少为6位', trigger: 'blur' }
-				],
-				verifycode: [{ required: true, trigger: 'blur', validator: validateVerifycode }]
-			}
-		};
-	},
-	methods: {
-		// 生成随机数
-		randomNum(min, max) {
-			return Math.floor(Math.random() * (max - min) + min);
-		},
-		// 切换验证码
-		refreshCode() {
-			this.identifyCode = '';
-			this.makeCode(this.identifyCodes, 4);
-		},
-		// 生成四位随机验证码
-		makeCode(o, l) {
-			for (let i = 0; i < l; i++) {
-				this.identifyCode += this.identifyCodes[this.randomNum(0, this.identifyCodes.length)];
-			}
-		},
-		handleLogin() {
-			this.$refs.loginForm.validate(valid => {
-				if (valid) {
-					this.loading = true;
-					const loginParams = {
-						loginUserId: this.loginForm.username,
-						password: encryptDes(this.loginForm.password),
-						loginType: this.loginType
-					};
-					this.$store.dispatch('login', loginParams).then(res => {
-						this.loading = false;
-						if (res.status === 200) {
-							this.$store.commit('SET_USER_INFO', res.data.onlineUserInfo);
-							this.$router.push({ path: '/' });
-						}
-					});
-				} else {
-					return false;
-				}
-			});
-		}
-	},
-	mounted() {
-		// 验证码初始化
-		this.identifyCode = '';
-		this.makeCode(this.identifyCodes, 4);
-	}
+  name: 'Login',
+  components: {
+    SIdentify
+  },
+  data() {
+    // 验证码自定义验证规则
+    const validateVerifycode = (rule, value, callback) => {
+      let newVal = value.toLowerCase();
+      let identifyStr = this.identifyCode.toLowerCase();
+      if (newVal === '') {
+        callback(new Error('请输入验证码'));
+      } else if (newVal !== identifyStr) {
+        callback(new Error('验证码不正确!'));
+      } else {
+        callback();
+      }
+    };
+    return {
+      loginForm: {
+        username: '',
+        password: '',
+        verifycode: ''
+      },
+      loginType: 'hs',
+      identifyCodes: '1234567890ABCDEFGHIGKLMNOPQRSTUVWXYZ',
+      identifyCode: '',
+      rememberPassword: true,
+      loading: false,
+      loginRules: {
+        username: [{ required: true, trigger: 'blur', message: '账号不能为空' }],
+        password: [
+          { required: true, message: '请输入密码', trigger: 'blur' },
+          { min: 6, message: '密码长度最少为6位', trigger: 'blur' }
+        ],
+        verifycode: [{ required: true, trigger: 'blur', validator: validateVerifycode }]
+      }
+    };
+  },
+  methods: {
+    // 生成随机数
+    randomNum(min, max) {
+      return Math.floor(Math.random() * (max - min) + min);
+    },
+    // 切换验证码
+    refreshCode() {
+      this.identifyCode = '';
+      this.makeCode(this.identifyCodes, 4);
+    },
+    // 生成四位随机验证码
+    makeCode(o, l) {
+      for (let i = 0; i < l; i++) {
+        this.identifyCode += this.identifyCodes[this.randomNum(0, this.identifyCodes.length)];
+      }
+    },
+    handleLogin() {
+      this.$refs.loginForm.validate((valid) => {
+        if (valid) {
+          this.loading = true;
+          const loginParams = {
+            loginUserId: this.loginForm.username,
+            password: encryptDes(this.loginForm.password),
+            loginType: this.loginType
+          };
+          this.$store.dispatch('login', loginParams).then((res) => {
+            this.loading = false;
+            if (res.status === 200) {
+              this.$store.commit('SET_USER_INFO', res.data.onlineUserInfo);
+              this.$router.push({ path: '/' });
+            }
+          });
+        } else {
+          return false;
+        }
+      });
+    }
+  },
+  mounted() {
+    // 验证码初始化
+    this.identifyCode = '';
+    this.makeCode(this.identifyCodes, 4);
+  }
 };
 </script>
 
@@ -192,7 +192,7 @@ export default {
 	padding: 0px 20px;
 	.login-title-item {
 		// flex: 1;
-		margin: 0 13px;
+		margin: 0 12px;
 		text-align: center;
 		cursor: pointer;
 		font-size: 20px;

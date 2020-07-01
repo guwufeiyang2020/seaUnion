@@ -1,19 +1,19 @@
 <template>
 	<div class="select-ship-wrapper">
 		<el-form :model="formData" :rules="rules" ref="SelectShipForm" label-width="140px">
-			<el-form-item label="船舶" prop="name">
-				<el-select v-model="formData.name" placeholder="请选择">
+			<el-form-item label="船舶：" prop="shipId">
+				<el-select v-model="formData.shipId" placeholder="请选择" filterable @change="changeShip">
 					<el-option
 						v-for="item in shipNameList"
-						:key="item.value"
-						:label="item.label"
-						:value="item.value"
+						:key="item.id"
+						:label="item.zhongwenchuanming"
+						:value="item.id"
 					></el-option>
 				</el-select>
 			</el-form-item>
-			<el-form-item label="船舶识别号码">{{shipNumber}}</el-form-item>
-			<el-form-item label="总吨位/载重吨">{{shipWeight}}</el-form-item>
-			<el-form-item label="船舶种类(闪点)">{{shipType}}</el-form-item>
+			<el-form-item label="船舶识别号码：">{{shipNumber}}</el-form-item>
+			<el-form-item label="总吨位/载重吨：">{{shipWeight}}</el-form-item>
+			<el-form-item label="船舶种类(闪点)：">{{shipType}}</el-form-item>
 		</el-form>
 		<div slot="footer" class="dialog-footer">
 			<el-button size="small" @click="resetFields">取 消</el-button>
@@ -23,63 +23,69 @@
 </template>
 
 <script>
+import { $http } from '@commonbox/utils';
+
 export default {
   name: 'selectShip',
-  props: {},
+  props: {
+    jumpFrom: {
+      required: true
+    }
+  },
   data() {
     return {
       formData: {
-        name: ''
+        shipId: '',
+        shipName: ''
       },
+      chuanbojingyingren: '',
       shipNumber: '',
       shipWeight: '',
       shipType: '',
       rules: {
-        name: [{ required: true, message: '请选择船舶', trigger: 'change' }]
+        shipId: [{ required: true, message: '请选择船舶', trigger: 'change' }]
       },
-      shipNameList: [
-        {
-          label: '舟山号 ',
-          value: '01'
-        },
-        {
-          label: '南通号',
-          value: '02'
-        },
-        {
-          label: '泰坦尼克号',
-          value: '03'
-        }
-      ]
+      shipNameList: []
     };
   },
 
   methods: {
+    async queryShipNameList() {
+      let { data } = await $http.get('/sdkseaunion/dataSourceApi/getShipList');
+      this.shipNameList = data.data;
+    },
+    changeShip(val) {
+      let obj = this.shipNameList.find(item => item.id === val);
+      this.shipNumber = obj.chuanboshibiehaoma;
+      this.shipWeight = `${obj.zongdun} / ${obj.zaizhongdun}`;
+      this.shipType = obj.chuanboleixing;
+      this.formData.shipName = obj.zhongwenchuanming;
+      this.chuanbojingyingren = obj.chuanbojingyingren;
+    },
     resetFields() {
+      this.$refs.SelectShipForm.resetFields();
+      this.shipNumber = '';
+      this.shipWeight = '';
+      this.shipType = '';
       this.$emit('closeSelectShipDialog');
     },
     saveInfo() {
       this.$refs.SelectShipForm.validate((valid) => {
         if (valid) {
-          const params = {
-            partnerIds: this.formData.value,
-            teamName: this.formData.name,
-            agentId: this.agentId
-          };
-          SocietyService.addStt(params)
-            .then((rep) => {
-              this.$message({
-                message: '已新增团队',
-                type: 'success'
-              });
-              this.$emit('closeAddDialog');
-            })
-            .catch((e) => {});
+          this.$refs.SelectShipForm.resetFields();
+          if (this.jumpFrom === 'rateList') {
+            this.$emit('saveSelectShipDialog', this.formData.shipName, this.chuanbojingyingren);
+          } else if (this.jumpFrom === 'questionList') {
+            this.$emit('saveSelectShipDialog', this.formData.shipName);
+          }
         } else {
           return false;
         }
       });
     }
+  },
+  mounted() {
+    this.queryShipNameList();
   }
 };
 </script>
@@ -87,6 +93,14 @@ export default {
 .el-dialog__body {
 	.ipt {
 		width: 656px;
+	}
+}
+.select-ship-wrapper {
+	/deep/ .el-form-item__label {
+		font-weight: bold;
+	}
+	/deep/ .el-select {
+		width: 250px;
 	}
 }
 </style>

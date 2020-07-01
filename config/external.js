@@ -5,8 +5,6 @@ const {
 } = require('./server');
 const publicPath = router.base.replace(/\/$/, '');
 
-// 这段代码的主要目的是打包的时候不把这些文件打包进去
-// 减少不必要的打包，build 之后这些文件会 以 script src 的形式动态嵌入到 html 中，并且会拷贝到 build 目录中
 function getDistVendorResources(key, isDevelopment) {
   const scripts = [];
   if (isDevelopment) {

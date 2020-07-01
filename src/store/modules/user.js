@@ -19,7 +19,6 @@ const user = {
       return new Promise((resolve, reject) => {
         $http.post('/sdkseaunion/loginApi/login', loginForm).then((res) => {
           if (res.data.status === 200) {
-            console.log(res);
             resolve(res.data);
           } else {
             this.$notify.error({
@@ -52,10 +51,14 @@ const user = {
     }) {
       return new Promise((resolve, reject) => {
         $http.get('/assso/userApi/getUserInfo').then((res) => {
-          const {
-            data
-          } = res.data;
-          commit('SET_USER_INFO', data);
+          if (res.data.status === 200) {
+            const { data } = res.data;
+            commit('SET_USER_INFO', data);
+          } else if (res.data.status === 500 && res.data.errormsg === '登录过期，请重新登录') {
+            router.push({
+              path: '/login'
+            });
+          }
         });
       });
     },

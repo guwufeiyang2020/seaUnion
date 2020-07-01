@@ -3,9 +3,9 @@
 		<div class="page-top">
 			<el-breadcrumb separator-class="el-icon-arrow-right">
 				<el-breadcrumb-item :to="{ path: '/rateList' }">评级赋分</el-breadcrumb-item>
-				<el-breadcrumb-item>{{$route.params.mode === 'edit'? '编辑': '查看'}}评级赋分</el-breadcrumb-item>
+				<el-breadcrumb-item>{{$route.params.mode === 'add'? '新增': '查看'}}评级赋分</el-breadcrumb-item>
 			</el-breadcrumb>
-			<h2 class="title">{{$route.params.mode === 'edit'? '编辑': '查看'}}评级赋分</h2>
+			<h2 class="title">{{$route.params.mode === 'add'? '新增': '查看'}}评级赋分</h2>
 		</div>
 		<div class="page-body">
 			<div class="page-left" v-if="shipInfos && shipInfos.length> 0">
@@ -19,25 +19,28 @@
 							<div>赋分值</div>
 						</li>
 						<li class="schedule-item" v-for="(item, index) in shipInfo.items" :key="index">
-							<div class="influence-factor">{{item.yingxiangyinsu}}</div>
-							<div class="actual-score">{{item.editValue}}</div>
+							<div class="influence-factor" :class="{'is-empty': item.isError}">{{item.yingxiangyinsu}}</div>
+							<div class="actual-score">{{item.shijidefen}}</div>
 							<div class="schedule-content-wrap">
 								<div class="schedule-content" v-for="(subItem, subIndex) in item.subList" :key="subIndex">
 									<div class="score-type" v-if="subItem.fufenleixing">{{subItem.fufenleixing}}</div>
 									<div class="schedule-content-inner">
 										<div
-											class="schedule-inner"
 											v-for="(thirdItem, thirdIndex) in subItem.thirdList"
+											class="schedule-inner"
+											:class="{'hover': $route.params.mode === 'add'&& item.canAddScore && thirdItem.canHover}"
 											:key="thirdIndex"
+											@mouseenter="mouseenterItem(thirdItem)"
 											@mouseleave="mouseleaveItem(thirdItem)"
 										>
 											<div class="journey">{{thirdItem.fufenbiaozhun}}</div>
 											<div class="lecturer">
 												{{thirdItem.fufenzhi}}
 												<i
+													v-if="item.canAddScore"
 													class="my-radio"
 													:class="[thirdItem.isChecked ? 'is-checked' : '']"
-													@click="selectScore(shipInfo,item, subItem, thirdItem)"
+													@click="selectScore(shipInfo, item, subItem, thirdItem)"
 												></i>
 											</div>
 										</div>
@@ -47,16 +50,20 @@
 						</li>
 						<li class="total-score">
 							<div>本项得分小计</div>
-							<div>{{ shipInfo.totalScore }}</div>
+							<div>{{ $route.params.mode === 'add'? totalScore(shipInfo) : shipInfo.totalScore }}</div>
 						</li>
 						<li class="total-weight">
 							<div>权重得分(实际得分*{{ shipInfo.quanzhong }}%)</div>
-							<div>{{ shipInfo.weightTotalScore }}</div>
+							<div>{{ $route.params.mode === 'add'? totalWeight(shipInfo) : shipInfo.weightTotalScore }}</div>
 						</li>
 					</ul>
 				</section>
 			</div>
-			<ul class="position-nav" :class="{ 'fixed-menu': fixedMenu }" v-if="shipInfos.length>0">
+			<ul
+				class="position-nav"
+				:class="{ 'fixed-menu': fixedMenu }"
+				v-if="shipInfos && shipInfos.length>0"
+			>
 				<li
 					class="nav-item"
 					:class="menuClickIndex === index ? 'active' : ''"
@@ -66,17 +73,17 @@
 				>{{ shipInfo.yinsufenlei }}({{ shipInfo.quanzhong }})</li>
 			</ul>
 		</div>
-		<div class="button-area" v-if="$route.params.mode === 'edit'">
-			<button class="btn-blue" @click="calcScore">提交并计算综合得分</button>
-			<button class="btn-blue">提交</button>
-			<button class="btn-default">取消</button>
+		<div class="button-area">
+			<button class="btn-blue" @click="calcScore">{{$route.params.mode === 'add' ? '提交并计算综合得分': '查看综合得分'}}</button>
+			<button class="btn-blue" @click="submitAddScore" v-if="$route.params.mode === 'add'">提交</button>
+			<button class="btn-default" v-if="$route.params.mode === 'add'" @click="backToList">取消</button>
 		</div>
 		<!-- 模态框 -->
-		<div class="model-wrapper" v-if="showResult">
+		<div class="model-wrapper" v-if="showResultModel">
 			<div class="model">
-				<h3 class="name">泰坦尼克号</h3>
-				<p class="result">综合得分：100分，无风险</p>
-				<my-rate :score="5" disabled />
+				<h3 class="name">{{$route.params.name}}</h3>
+				<p class="result" :style="{ color: colorComputed}">{{resultDesc}}</p>
+				<my-rate :score="rateLevel" disabled />
 				<el-button @click="backToList">返回评级赋分列表</el-button>
 			</div>
 			<div class="mask"></div>
@@ -93,14 +100,63 @@ export default {
   components: { MyRate },
   data() {
     return {
-      shipInfos: {},
+      shipInfos: [],
       menuClickIndex: 0,
       scrollTop: 0,
       fixedMenu: false,
-      showResult: false
+      showResultModel: false,
+      hasEmpty: false,
+      resultDesc: '',
+      rateLevel: 0
     };
   },
-
+  computed: {
+    totalScore() {
+      return (shipInfo) => {
+        let scoreNum = 0;
+        shipInfo.items.forEach((item) => {
+          if (item.shijidefen) {
+            scoreNum += parseInt(item.shijidefen, 10);
+          }
+        });
+        shipInfo.totalScore = scoreNum;
+        return scoreNum;
+      };
+    },
+    totalWeight() {
+      return (shipInfo) => {
+        let weight = 0;
+        let scoreNum = 0;
+        shipInfo.items.forEach((item) => {
+          if (item.shijidefen) {
+            scoreNum += parseInt(item.shijidefen, 10);
+          }
+        });
+        weight = (scoreNum * parseInt(shipInfo.quanzhong, 10)) / 100;
+        shipInfo.weightTotalScore = weight;
+        return weight === 0 ? 0 : weight;
+      };
+    },
+    // 总的权重
+    weightSumScore() {
+      let weightScore = 0;
+      this.shipInfos.forEach((item) => {
+        weightScore += (item.totalScore * parseInt(item.quanzhong, 10)) / 100;
+      });
+      return weightScore;
+    },
+    colorComputed() {
+      if (this.rateLevel === 1 || this.rateLevel === 2) {
+        return '#FF1E00';
+      }
+      if (this.rateLevel === 3 || this.rateLevel === 4) {
+        return '#F7B500';
+      }
+      if (this.rateLevel === 5) {
+        return '#00DA62';
+      }
+    }
+  },
   methods: {
     clickMenu(index) {
       this.menuClickIndex = index;
@@ -126,37 +182,131 @@ export default {
       }
     },
     async queryShipDeatail() {
-      let { data } = await $http.get('/sdkseaunion/ratingApi/getRatingItems', {
-        params: { shipName: this.$route.params.id }
+      let queryParams = {};
+      let url = '';
+      if (this.$route.params.mode === 'add') {
+        queryParams.shipName = this.$route.params.name;
+        url = '/sdkseaunion/ratingApi/getRatingItems';
+      } else {
+        queryParams.id = this.$route.params.id;
+        url = '/sdkseaunion/ratingApi/getRatingItemsById';
+      }
+
+      let { data } = await $http.get(url, {
+        params: queryParams
       });
       this.shipInfos = data.data;
-      if (this.shipInfos && this.shipInfos.length > 0) {
+      if (this.shipInfos && this.shipInfos.length > 0 && this.$route.params.mode === 'add') {
         this.shipInfos.forEach((item1) => {
           item1.items.forEach((item2) => {
+            if (item2.shijidefen) {
+              // 如果有值，就不可以赋分，否则能赋分
+              this.$set(item2, 'canAddScore', false);
+            } else {
+              this.$set(item2, 'canAddScore', true);
+              this.$set(item2, 'isError', false);
+            }
             item2.subList.forEach((item3) => {
               item3.thirdList.forEach((item4) => {
                 this.$set(item4, 'isChecked', false);
+                this.$set(item4, 'canHover', false);
               });
             });
           });
         });
       }
     },
+    mouseenterItem(thirdItem) {
+      thirdItem.canHover = true;
+    },
     mouseleaveItem(thirdItem) {
-      thirdItem.isChecked = false;
+      if (!thirdItem.isChecked) {
+ 				thirdItem.canHover = false;
+      	thirdItem.isChecked = false;
+      }
     },
     selectScore(shipInfo, item, subItem, thirdItem) {
+      subItem.thirdList.forEach((item5) => {
+        item5.canHover = false;
+        item5.isChecked = false;
+      });
       thirdItem.isChecked = !thirdItem.isChecked;
-      this.$set(thirdItem, 'selectFufenzhi', thirdItem.fufenzhi);
-      this.$set(item, 'editValue', thirdItem.fufenzhi);
+      if (thirdItem.isChecked) {
+        this.$set(thirdItem, 'selectFufenzhi', thirdItem.fufenzhi);
+        item.shijidefen = thirdItem.fufenzhi;
+        thirdItem.canHover = true;
+      } else {
+        this.$set(thirdItem, 'selectFufenzhi', '');
+        item.shijidefen = '';
+        thirdItem.canHover = false;
+      }
+    },
+    checkScore() {
+      // 检查实际得分是否为空
+      let newArr = [];
+      this.shipInfos.forEach((item1) => {
+        item1.items.forEach((item2) => {
+          newArr.push(item2);
+          item2.isError = false;
+          if (item2.shijidefen === '') {
+            this.$message({
+              message: '请输入实际得分',
+              type: 'warning'
+            });
+            item2.isError = true;
+          }
+        });
+      });
+      this.hasEmpty = newArr.some(item => item.shijidefen === '');
+    },
+    calcScore() {
+      this.checkScore();
+      if (this.hasEmpty) {
+        return;
+      }
+      this.showResultModel = true;
+      $http
+        .post('/sdkseaunion/ratingApi/addRatingItems', {
+          data: JSON.stringify(this.shipInfos),
+          weightSumScore: this.weightSumScore,
+          shipName: this.$route.params.name,
+          chuanbojingyingren: this.$route.params.shipPerson
+        })
+        .then((res) => {
+          if (res.status === 200) {
+            this.resultDesc = res.data.data.desc;
+            this.rateLevel = parseInt(res.data.data.xingji, 10);
+          }
+        });
+    },
+    submitAddScore() {
+      this.checkScore();
+      if (this.hasEmpty) {
+        return;
+      }
+      $http
+        .post('/sdkseaunion/ratingApi/addRatingItems', {
+          data: JSON.stringify(this.shipInfos),
+          weightSumScore: this.weightSumScore,
+          shipName: this.$route.params.name,
+          chuanbojingyingren: this.$route.params.shipPerson
+        })
+        .then((res) => {
+          if (res.status === 200) {
+            this.$message({
+              message: '提交成功',
+              type: 'success'
+            });
+            this.$router.push({
+              path: '/rateList'
+            });
+          }
+        });
     },
     backToList() {
       this.$router.push({
         path: '/rateList'
       });
-    },
-    calcScore() {
-      this.showResult = true;
     }
   },
   watch: {
@@ -237,6 +387,7 @@ export default {
 			height: 20px;
 			line-height: 20px;
 			margin-bottom: 40px;
+			font-size: 14px;
 			color: #666;
 			cursor: pointer;
 			&::before {
@@ -302,6 +453,9 @@ export default {
 		display: flex;
 		align-items: center;
 		padding: 6px 0 6px 10px;
+		&.is-empty {
+			color: #f00;
+		}
 	}
 	.actual-score {
 		width: 160px;
@@ -353,7 +507,7 @@ export default {
 						}
 					}
 
-					&:hover {
+					&.hover {
 						background: rgba(27, 133, 255, 0.1);
 						.my-radio {
 							display: block;
@@ -428,10 +582,8 @@ export default {
 		top: 50%;
 		z-index: 10;
 		width: 550px;
-		height: 300px;
 		background: #fff;
-		padding-top: 10px;
-		padding-bottom: 20px;
+		padding: 30px 0;
 		margin: -192px 0 0 -192px;
 		box-shadow: 0 12px 24px 0 rgba(28, 31, 33, 0.1);
 		border-radius: 4px;
@@ -440,21 +592,21 @@ export default {
 		text-align: center;
 	}
 	.name {
-		height: 70px;
-		line-height: 70px;
-		font-size: 18px;
+		height: 60px;
+		line-height: 60px;
+		font-size: 22px;
 		color: #333;
 	}
 	.result {
-		height: 70px;
-		line-height: 70px;
+		height: 60px;
+		line-height: 60px;
 		font-size: 20px;
 		color: #00ae65;
 		font-weight: bold;
 	}
 	.rate {
 		margin: 10px 0 32px 0;
-		.icon-xingxing {
+		/deep/ .iconfont {
 			font-size: 32px;
 		}
 	}

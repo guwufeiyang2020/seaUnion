@@ -23,9 +23,7 @@
         <div id="app"></div>
     </div>
     <script>
-        // var width = window.innerWidth * 100 / 1920;
-        // document.getElementById('all').style.fontSize = width + 'px';
-        // window.globalConfig = < %= JSON.stringify(globalConfig) % >
+        window.globalConfig = <%= JSON.stringify(globalConfig) %>
     </script>
     <%= importScripts %>
         <!-- built files will be auto injected -->

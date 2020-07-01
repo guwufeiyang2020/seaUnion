@@ -3,6 +3,7 @@ import Vuex from 'vuex';
 import creatPersistedstate from 'vuex-persistedstate';
 import user from './modules/user';
 import menu from './modules/menu';
+
 import {
   getters
 } from './getters';

@@ -11,6 +11,12 @@
     margin: 0 auto;
 }
 
+.AppList_Main {
+    width: 1280px !important;
+    margin: 12px auto !important;
+    height: calc(100% - 24px) !important;
+}
+
 // 清除浮动
 .clearfix:after {
     content: '';
@@ -56,16 +62,6 @@
     border-radius: 10px;
     box-shadow: inset 0 0 6px rgba(0, 0, 0, .3);
     background-color: #CBCBCB;
-}
-
-.no-data {
-    width: 100%;
-    height: 100%;
-    margin-top: 50px;
-    text-align: center;
-    font-size: 16px;
-    color: #363b40;
-    line-height: 30px;
 }
 
 // 按钮样式

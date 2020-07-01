@@ -3,6 +3,7 @@ node_modules
 academy-node
 dist-academy
 union
+seeUnion
 config/server.js
 /dist
 /portal-node

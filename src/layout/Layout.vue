@@ -3,7 +3,7 @@
 		<v-header></v-header>
 		<div class="main-box">
 			<transition name="fade" mode="out-in">
-				<router-view></router-view>
+				<router-view :key="new Date().getTime()"></router-view>
 			</transition>
 		</div>
 	</div>

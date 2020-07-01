@@ -1,11 +1,11 @@
 <template>
-	<!-- 头部 -->
+	<!-- 头部 :class="{'header-big': showBigScreen}" -->
 	<div class="header-wrapper">
-		<div class="header-content" :class="{'header-big': showBigScreen}">
+		<div class="header-content">
 			<img src="../assets/images/logo.png" class="logo" @click="jumpHome" />
 			<div class="login-area">
 				<!-- 递归菜单 -->
-				<el-menu default-active="0" class="el-menu-demo" mode="horizontal" @select="handleSelect">
+				<el-menu default-active="0" class="el-menu-demo" mode="horizontal" >
 					<nav-menu :navMenus="asideMenu"></nav-menu>
 				</el-menu>
 				<!-- 递归菜单结束 -->
@@ -56,8 +56,14 @@ export default {
     layout() {
       this.$store.dispatch('layout');
     },
-    handleSelect(key, keyPath) {
-      console.log(key, keyPath);
+    jumpUserInfo() {
+ 			const dominUrl = window.globalConfig.server.www;
+      const linkUrl = `${dominUrl}space-${window.AY.getSpaceId()}/user/setting?nakedLayout=1`;
+      let routeUrl = this.$router.resolve({
+        path: '/iframContainer',
+        query: { link: linkUrl }
+      });
+      window.open(routeUrl.href, '_blank');
     },
     jumpHome() {
       this.$router.push({
@@ -119,6 +125,7 @@ export default {
 	width: 100%;
 	height: 60px;
 	background: #fff;
+	border-bottom: 1px solid #2a86d8;
 	box-shadow: 0px 3px 5px 0px rgba(0, 0, 0, 0.1);
 }
 .header-content {

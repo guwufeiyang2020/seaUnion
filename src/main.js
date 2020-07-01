@@ -1,7 +1,4 @@
-/* eslint-disable no-restricted-globals */
 import Vue from 'vue';
-
-
 import './icons';
 import './utils/rem';
 
@@ -14,13 +11,16 @@ import './assets/styles/index.scss';
 import 'babel-polyfill';
 import './assets/js/install';
 
-import './mock';
+import VueBus from './utils/eventBus';
 
+Vue.use(VueBus);
+
+// import './mock';
 
 Vue.config.productionTip = false;
 
 new Vue({
-    router,
-    store,
-    template: '<router-view></router-view>',
+  router,
+  store,
+  template: '<router-view></router-view>',
 }).$mount('#app');

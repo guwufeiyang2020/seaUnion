@@ -59,6 +59,9 @@
       }
     ],
     "prefer-const": "off",
+    "no-debugger": "off",
+    "no-empty": "off",
+    "no-mixed-spaces-and-tabs": "off",
     "no-else-return": [
       "error",
       {

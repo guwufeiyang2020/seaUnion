@@ -3,14 +3,28 @@
 		<h2 class="title">检查问卷</h2>
 		<div class="search-area">
 			<div class="button-area">
-				<button class="btn-blue">添加</button>
-				<button class="btn-default">导入</button>
+				<button class="btn-blue" @click="addClick">添加</button>
+				<el-upload
+					class="upload-demo"
+					:action="uploadUrl()"
+					:limit="1"
+					:data="uploadParams"
+					accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+					:on-exceed="handleExceed"
+					:on-success="handleSuccess"
+					:show-file-list="false"
+				>
+					<el-button size="small" plain>导入</el-button>
+					<div slot="tip" class="el-upload__tip">只能上传xlsx/xls文件</div>
+				</el-upload>
 			</div>
 			<div class="search-box">
 				<el-date-picker
 					size="small"
 					v-model="date"
 					type="datetimerange"
+          value-format="yyyy-MM-dd HH:mm:ss"
+					format="yyyy-MM-dd HH:mm:ss"
 					:picker-options="pickerOptions"
 					range-separator="至"
 					start-placeholder="开始日期"
@@ -26,27 +40,38 @@
 				></el-input>
 			</div>
 		</div>
-		<el-table
-			ref="multipleTable"
-			:data="tableData"
-			style="width: 100%;"
-			@selection-change="handleSelectionChange"
-		>
-			<el-table-column type="selection" width="60"></el-table-column>
+		<el-table :data="tableData" style="width: 100%;">
 			<el-table-column label="船舶名称" width="220">
 				<template slot-scope="scope">
-					<el-button type="text" size="small" @click="goRateDetail(scope.row)">{{ scope.row.shipName }}</el-button>
+					<el-button type="text" size="small" @click="goQuestionDetail(scope.row)">
+						{{
+						scope.row.chuanbomingcheng
+						}}
+					</el-button>
 				</template>
 			</el-table-column>
-			<el-table-column prop="checkScore" label="检查评分" width="140"></el-table-column>
-			<el-table-column prop="rateTime" label="检查时间" width="140"></el-table-column>
-			<el-table-column prop="shipType" label="船型" width="160"></el-table-column>
-			<el-table-column prop="affiliatedEnterprise" label="所属企业" width="240"></el-table-column>
+			<el-table-column prop="checkScore" label="检查评分" width="140">
+				<template slot-scope="scope">
+          <span :style="{ color: colorComputed(scope.row.hegezhuangtai) }">{{ scope.row.shijiedefen }}-{{ scope.row.hegezhuangtai }}</span>
+        </template>
+			</el-table-column>
+			<el-table-column prop="last_modified" label="检查时间" width="190"></el-table-column>
+			<el-table-column prop="chuanxing" label="船型" width="180"></el-table-column>
+			<el-table-column prop="chuanbojingyingren" label="所属企业" width="260"></el-table-column>
 			<el-table-column label="操作">
 				<template slot-scope="scope">
-					<el-button type="text" size="small" @click="exportQuestionnaire(scope.row)">导出问卷</el-button>
-					<el-button type="text" size="small" @click="exportDeductList(scope.row)">导出扣分清单</el-button>
-					<el-button type="text" size="small" @click="editClick(scope.row)">编辑</el-button>
+					<a
+						class="link"
+						:href="
+							`/sdkseaunion/execlExportApi/inspectExport?weiyibiaoshi=${scope.row.weiyibiaoshi}`
+						"
+					>导出问卷</a>
+					<a
+						class="link"
+						:href="
+							`/sdkseaunion/execlExportApi/inspectDeductedExport?weiyibiaoshi=${scope.row.weiyibiaoshi}`
+						"
+					>导出扣分清单</a>
 					<el-button type="text" size="small" @click="deleteClick(scope.row)">删除</el-button>
 				</template>
 			</el-table-column>
@@ -55,21 +80,38 @@
 			@size-change="handleSizeChange"
 			@current-change="handleCurrentChange"
 			:current-page="currentPage"
-			:page-sizes="[100, 200, 300, 400]"
-			:page-size="100"
+			:page-sizes="[10, 20, 50, 100]"
+			:page-size="pageSize"
 			layout="total, sizes, prev, pager, next, jumper"
-			:total="40"
+			:total="total"
 		></el-pagination>
+		<!-- 请选择船舶 -->
+		<el-dialog
+			title="请选择船舶"
+			width="520px"
+			:close-on-click-modal="false"
+			@close="dialogAddClose"
+			:visible.sync="selectShipDialogVisible"
+		>
+			<select-ship
+				ref="selectShip"
+				:jumpFrom="'questionList'"
+				@closeSelectShipDialog="closeSelectShipDialog"
+				@saveSelectShipDialog="saveSelectShipDialog"
+			></select-ship>
+		</el-dialog>
 	</div>
 </template>
 
 <script>
 import utils from '@/utils/util';
+import { $http } from '@commonbox/utils';
+import SelectShip from '../rateScore/selectShip';
 
 export default {
+  components: { SelectShip },
   data() {
     return {
-      rateTable: [{}],
       date: '',
       pickerOptions: {
         shortcuts: [
@@ -102,59 +144,132 @@ export default {
           }
         ]
       },
-      tableData: [
-        {
-          id: '01',
-          shipName: '舟山号',
-          checkScore: '优秀-100',
-          rateTime: '2020-08-25 12:00',
-          shipType: '10000总吨以上',
-          affiliatedEnterprise: '江苏南通货运有限公司 '
-        },
-        {
-          id: '02',
-          shipName: '南通号',
-          checkScore: '良好-70',
-          rateTime: '2020-08-25 12:00',
-          shipType: '10000总吨以上',
-          affiliatedEnterprise: '江苏南通货运有限公司'
-        },
-        {
-          id: '03',
-          shipName: '泰坦尼克号',
-          checkScore: '不合格-40',
-          rateTime: '2020-08-25 12:00',
-          shipType: '10000总吨以上',
-          affiliatedEnterprise: '江苏南通货运有限公司 '
-        }
-      ],
+      tableData: [],
       searchKey: '',
-      currentPage: 1
+      currentPage: 1,
+      pageSize: 10,
+      total: 0,
+      selectShipDialogVisible: false
     };
+  },
+  computed: {
+    uploadParams() {
+      let params = {
+        importType: this.$route.params.wenjuanleixing
+      };
+      return params;
+    },
+    colorComputed() {
+      return (text) => {
+        if (text === '优秀') {
+          return '#00AE65';
+        }
+        if (text === '合格') {
+          return '#FA8C15';
+        }
+        if (text === '不合格') {
+          return '#E62512';
+        }
+      };
+    }
   },
   watch: {
     searchKey() {
-      utils.throttle(this.queryRateList());
+      utils.throttle(this.queryQuestionList());
+    },
+    date() {
+      utils.throttle(this.queryQuestionList());
+    },
+    $route(to, from) {
+      this.queryQuestionList();
     }
   },
   methods: {
-    queryRateList() {},
-    exportQuestionnaire(item) {},
-    exportDeductList(item) {},
-    editClick(item) {
+    // execl-上传相关
+    handleExceed(files, fileList) {
+      this.$message.warning('只能上传一张execl表');
+    },
+    uploadUrl() {
+      return '/sdkseaunion/execlImportApi/importInspect';
+    },
+    handleSuccess(file, fileList) {
+      let { shipName } = file.data.biaotiItems;
+      let { weiyibiaoshi } = file.data;
       this.$router.push({
-        path: `/questionDetail/${item.id}/edit`
+        path: `/questionDetail/view/${shipName}/${this.$route.params.wenjuanleixing}/${weiyibiaoshi}`
       });
     },
-    goRateDetail(item) {
+    async queryQuestionList() {
+      const queryParams = {
+        startPos: (this.currentPage - 1) * this.pageSize,
+        pageSize: this.pageSize,
+        searchName: this.searchKey,
+        wenjuanleixing: this.$route.params.wenjuanleixing
+      };
+      if (this.date) {
+        queryParams.startTime = this.date[0];
+        queryParams.endTime = this.date[1];
+      }
+      let { data } = await $http.get('/sdkseaunion/inspectApi/questionList', {
+        params: queryParams
+      });
+      this.tableData = data.data;
+      this.total = data.totalCount;
+    },
+    handleDateTimerange() {
+      // this.queryQuestionList();
+    },
+    addClick() {
+      this.selectShipDialogVisible = true;
+    },
+    dialogAddClose() {
+      this.selectShipDialogVisible = false;
+    },
+    closeSelectShipDialog() {
+      this.selectShipDialogVisible = false;
+    },
+    saveSelectShipDialog(shipName) {
+      this.selectShipDialogVisible = false;
       this.$router.push({
-        path: `/questionDetail/${item.id}/view`
+        path: `/questionDetail/add/${shipName}/${this.$route.params.wenjuanleixing}`
       });
     },
-    deleteClick(item) {},
-    handleSelectionChange() {},
-    handleSizeChange() {},
-    handleCurrentChange() {}
+    goQuestionDetail(item) {
+      this.$router.push({
+        path: `/questionDetail/view/${item.chuanbomingcheng}/${this.$route.params.wenjuanleixing}/${item.weiyibiaoshi}`
+      });
+    },
+    deleteClick(item) {
+      this.$confirm('确定删除吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(() => {
+          $http
+            .post('/sdkseaunion/inspectApi/delInspectByNo', { weiyibiaoshi: item.weiyibiaoshi })
+            .then((rspData) => {
+              this.$message({
+                type: 'success',
+                message: '删除成功!'
+              });
+              this.queryQuestionList();
+            });
+        })
+        .catch(() => {});
+    },
+    handleSizeChange(val) {
+      this.pageSize = val;
+      this.queryQuestionList();
+    },
+    handleCurrentChange(val) {
+      this.currentPage = val;
+      this.queryQuestionList();
+    }
+  },
+  mounted() {
+    /* this.type = 'questionList'; */
+    this.queryQuestionList();
   }
 };
 </script>
@@ -162,10 +277,11 @@ export default {
 <style lang="scss" scoped>
 .rate-score-wrapper {
 	width: 1280px;
-	height: 600px;
+	// height: 600px;
 	margin: 12px auto;
 	padding: 0 20px;
 	background: #fff;
+	min-height: calc(100vh - 84px);
 }
 .title {
 	height: 60px;
@@ -173,10 +289,27 @@ export default {
 	color: #000;
 	font-size: 18px;
 }
+.link {
+	font-size: 12px;
+	margin-right: 10px;
+	color: #409eff;
+}
+.el-pagination {
+  margin: 10px 0;
+}
 .search-area {
 	height: 48px;
 	display: flex;
 	justify-content: space-between;
+	.button-area {
+		display: flex;
+	}
+	.upload-demo {
+		display: flex;
+		.el-upload__tip {
+			margin-left: 5px;
+		}
+	}
 	.el-input {
 		width: 200px;
 	}

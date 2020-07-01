@@ -4,7 +4,7 @@ import '../utils/install';
 import NProgress from 'nprogress'; // progress bar
 import {
   patchGlobalConfig
-} from '../services';
+} from '../services/globalConfig';
 import store from '../store/index';
 import {
   routers
@@ -17,16 +17,12 @@ NProgress.configure({
   showSpinner: false,
 });
 
-const {
-  globalConfig
-} = window;
 
 Vue.use(VueRouter);
 
 const router = new VueRouter({
   mode: 'history',
-  // base: 'globalConfig.router.base',
-  base: '/see/union',
+  base: globalConfig.router.base,
   routes: routers,
 });
 

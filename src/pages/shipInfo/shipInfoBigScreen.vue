@@ -10,20 +10,23 @@
 					</div>
 				</div>
 				<div class="dynamic-list-wrapper">
-					<div class="dynamic-list">
-						<div class="dynamic-item" v-for="item in shipList" :key="item.id">
-							<div class="name">{{item.name}}</div>
-							<div class="time">{{item.time}}</div>
+					<swiper class="dynamic-list" :options="swiperOption" ref="MySwiper">
+						<swiper-slide class="dynamic-item" v-for="item in shipList" :key="item.id">
+							<div class="name txt-ellipsis" :title="item.chuanming">{{ item.chuanming }}</div>
+							<div class="time txt-ellipsis">{{ item.daogangriqi }}</div>
 							<div class="level-risk">
-								<span v-if="item.status === 3 || item.status === 4" class="risk">一般风险</span>
-								<span v-if="item.status === 1 || item.status === 2" class="risk red">最高风险</span>
-								<span v-if="item.status === 5" class="risk green">最低风险</span>
-								<my-rate :score="item.status" disabled />
+								<span v-if="item.xingji === '3' || item.xingji === '4'" class="risk">一般风险</span>
+								<span v-if="item.xingji === '1' || item.xingji === '2'" class="risk red">最高风险</span>
+								<span v-if="item.xingji === '5'" class="risk green">最低风险</span>
+								<my-rate :score="+item.xingji" disabled />
 							</div>
-							<div class="score" :style="{ color: colorComputed(item.status) }">{{item.score}}</div>
-							<div class="company">{{item.company}}</div>
-						</div>
-					</div>
+							<div class="score" :style="{ color: colorComputed(item.xingji) }">{{ item.quanzhongzongfen }}</div>
+							<div class="company txt-ellipsis">{{ item.chuanbojingyingren }}</div>
+						</swiper-slide>
+					</swiper>
+					<!-- 如果需要导航按钮 -->
+					<div class="swiper-button-prev"></div>
+					<div class="swiper-button-next"></div>
 				</div>
 			</div>
 
@@ -41,11 +44,28 @@
 import MyRate from '@/components/Rate';
 import echarts from 'echarts';
 import Echart from '@/components/EChart';
+import { $http } from '@commonbox/utils';
+import { Swiper, SwiperSlide, directive } from 'vue-awesome-swiper';
+import 'swiper/css/swiper.css';
 
 export default {
-  components: { MyRate, Echart },
+  components: { MyRate, Echart, Swiper, SwiperSlide },
+  directives: {
+    swiper: directive
+  },
   data() {
     return {
+      swiperOption: {
+        slidesPerView: 5,
+        grabCursor: true,
+        freeMode: true,
+        spaceBetween: 20,
+        // 如果需要前进后退按钮
+        navigation: {
+          nextEl: '.swiper-button-next',
+          prevEl: '.swiper-button-prev'
+        }
+      },
       shipList: [],
       shipEchartData: {
         xData: [],
@@ -54,15 +74,18 @@ export default {
     };
   },
   computed: {
+    swiper() {
+      return this.$refs.MySwiper.$swiper;
+    },
     colorComputed() {
       return (status) => {
-        if (status === 1 || status === 2) {
+        if (status === '1' || status === '2') {
           return '#FF1E00';
         }
-        if (status === 3 || status === 4) {
+        if (status === '3' || status === '4') {
           return '#F7B500';
         }
-        if (status === 5) {
+        if (status === '5') {
           return '#00DA62';
         }
       };
@@ -73,18 +96,17 @@ export default {
       this.nowIndex = index;
     },
     getShipData() {
-      this.$http.get('/home/getData').then((res) => {
-        if (res.data.code === 20000) {
-          this.shipList = res.data.data.shipList;
+      $http.get('/sdkseaunion/portalApi/shipDynamicList').then((res) => {
+        if (res.data.status === 200) {
+          this.shipList = res.data.data;
         }
       });
     },
     getEchartData() {
-      this.$http.get('/home/getEchartData').then((res) => {
-        if (res.data.code === 20000) {
-          let { shipData } = res.data.data;
-          // console.log(res.data.data.shipData);
-          this.shipEchartData.xData = shipData.date;
+      $http.get('/sdkseaunion/portalApi/fiveStarStatisticsGroupMonth').then((res) => {
+        if (res.data.status === 200) {
+          let { date, value } = res.data.data;
+          this.shipEchartData.xData = date;
           this.shipEchartData.series.push({
             name: '五星船舶数',
             areaStyle: {
@@ -102,7 +124,7 @@ export default {
                 ])
               }
             }, // 区域颜色渐变
-            data: shipData.data,
+            data: value,
             type: 'line',
             smooth: true
           });
@@ -137,15 +159,15 @@ $colorBlue: #1b85ff;
 	left: 0;
 	overflow-y: auto;
 	overflow-x: hidden;
+	user-select: none;
 	background: rgba(4, 18, 58, 0.8);
 	padding: 0 0.625rem;
 }
 
 .dynamic {
 	.title-wrapper {
-		height: 0.520833rem;
+		height: 0.5rem;
 		display: flex;
-		/* justify-content: space-between; */
 		align-items: center;
 		color: #fff;
 		.title {
@@ -154,19 +176,31 @@ $colorBlue: #1b85ff;
 		}
 		.time {
 			margin-left: 14px;
+			font-size: 14px;
 		}
 	}
 	.dynamic-list-wrapper {
-		overflow: hidden;
+		position: relative;
+
+		.swiper-button-prev {
+			left: -50px;
+			color: #fff;
+			font-size: 0.3rem;
+			outline: none;
+		}
+		.swiper-button-next {
+			right: -50px;
+			color: #fff;
+			font-size: 0.3rem;
+			outline: none;
+		}
 	}
 	.dynamic-list {
 		display: flex;
-		justify-content: space-between;
 	}
 	.dynamic-item {
 		width: 1.5625rem;
 		height: 1.5625rem;
-		margin: 0 0.234375rem 0 0;
 		padding-top: 0.083333rem;
 		border-radius: 2px;
 		color: #fff;
@@ -179,14 +213,20 @@ $colorBlue: #1b85ff;
 			margin-right: 0;
 		}
 		.name {
+			width: 100%;
+			text-align: center;
+			padding: 0 0.1rem;
 			line-height: 0.28125rem;
 			font-size: 0.125rem;
 			font-weight: bold;
 		}
 		.time {
+			width: 100%;
+			text-align: center;
+			padding: 0 0.1rem;
 			height: 0.244792rem;
 			line-height: 0.182292rem;
-			font-size: 0.104167rem;
+			font-size: 0.1rem;
 		}
 		.level-risk {
 			display: flex;
@@ -212,11 +252,16 @@ $colorBlue: #1b85ff;
 			font-size: 0.104167rem;
 		}
 		.score {
+			height: 0.520833rem;
 			line-height: 0.520833rem;
-			font-size: 0.3125rem;
+			font-size: 0.26rem;
 			font-weight: 600;
 		}
 		.company {
+			width: 100%;
+			text-align: center;
+			padding: 0 0.1rem;
+			height: 0.104167rem;
 			line-height: 0.104167rem;
 			font-size: 0.083333rem;
 		}

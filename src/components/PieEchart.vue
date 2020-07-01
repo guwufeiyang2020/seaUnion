@@ -6,27 +6,26 @@
 import echarts from 'echarts';
 
 export default {
+  props: {
+    echartData: {
+      type: Array,
+      default: () => []
+    }
+  },
   data() {
     return {
-      chartPie: null,
-      opinionData: [
-        { value: 123, name: '最低风险' },
-        { value: 299, name: '四星风险' },
-        { value: 427, name: '三星风险' },
-        { value: 108, name: '二星风险' },
-        { value: 12, name: '最高风险' }
-      ]
+      chartPie: null
     };
   },
+  watch: {
+    echartData: {
+      handler() {
+        this.drawPieChart();
+      },
+      deep: true
+    }
+  },
   methods: {
-    initChart() {
-      if (this.chartPie) {
-        this.chartPie.setOption(this.options);
-      } else {
-        this.chartPie = echarts.init(this.$refs.echart);
-        this.chartPie.setOption(this.options);
-      }
-    },
     drawPieChart() {
       this.chartPie = echarts.init(document.getElementById('chartPie'));
       this.chartPie.setOption({
@@ -51,14 +50,18 @@ export default {
             type: 'pie',
             radius: ['40%', '70%'],
             center: ['50%', '60%'],
-            data: this.opinionData
+            data: this.echartData
           }
         ]
       });
+      // 设置表格的点击事件进行路由的切换
+      this.chartPie.on('click', (param) => {
+        // console.log(param);
+        this.$router.push({
+          path: `/rateList/${param.data.star}`
+        });
+      });
     }
-  },
-  mounted() {
-    this.drawPieChart();
   }
 };
 </script>

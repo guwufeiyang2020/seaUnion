@@ -3,7 +3,18 @@
 		<div class="section-wrapper"></div>
 		<div class="section-innner">
 			<div class="notice-wrapper">
-				<span class="img"></span>国家税务总局：一季度发放“银税互动”贷款75万笔，超2019年的一半，越来越多的小微企业从中受益。
+				<span class="img"></span>
+				<div class="new-wrapper">
+					<ul class="new-list" :class="{'marquee-top': isAnimate}">
+						<li
+							class="new-item txt-ellipsis"
+							:title="item.neirong"
+							v-for="(item, index) in noticeMes"
+							:key="index">
+							 {{item.neirong}}
+						</li>
+					</ul>
+				</div>
 			</div>
 			<div class="dynamic">
 				<div class="title-wrapper">
@@ -14,146 +25,46 @@
 				</div>
 				<div class="dynamic-list-wrapper">
 					<div class="dynamic-list">
-						<div class="dynamic-item">
+						<div
+							class="dynamic-item"
+							v-for="item in shipList"
+							:key="item.id"
+							@click="jumpRateDetail(item)"
+						>
 							<div class="top">
-								<div class="name">泰坦尼克10001号</div>
+								<div class="name">{{ item.chuanming }}</div>
 								<div class="level-risk">
-									<my-rate :score="3" disabled />
-									<span class="risk">一般风险</span>
+									<my-rate :score="+item.xingji" disabled />
+									<span v-if="item.xingji === '3' || item.xingji === '4'" class="risk">一般风险</span>
+									<span v-if="item.xingji === '1' || item.xingji === '2'" class="risk red">最高风险</span>
+									<span v-if="item.xingji === '5'" class="risk green">最低风险</span>
 								</div>
 							</div>
 							<div class="body">
 								<div class="dynamic-info">
 									<span class="label">预计到港时间</span>
-									<span class="val">05-20 12:00</span>
+									<span class="val">{{ item.daogangriqi }}</span>
 								</div>
 								<div class="dynamic-info">
 									<span class="label">作业货品</span>
-									<span class="val">92#汽油</span>
+									<span class="val">{{ item.zuoyehuopin }}</span>
 								</div>
 								<div class="dynamic-info">
 									<span class="label">所属企业</span>
-									<span class="val">江苏南通如皋货运有限公司</span>
-								</div>
-							</div>
-						</div>
-						<div class="dynamic-item">
-							<div class="top">
-								<div class="name">泰坦尼克10001号</div>
-								<div class="level-risk">
-									<my-rate :score="3" disabled />
-									<span class="risk">一般风险</span>
-								</div>
-							</div>
-							<div class="body">
-								<div class="dynamic-info">
-									<span class="label">预计到港时间</span>
-									<span class="val">05-20 12:00</span>
-								</div>
-								<div class="dynamic-info">
-									<span class="label">作业货品</span>
-									<span class="val">92#汽油</span>
-								</div>
-								<div class="dynamic-info">
-									<span class="label">所属企业</span>
-									<span class="val">江苏南通如皋货运有限公司</span>
-								</div>
-							</div>
-						</div>
-						<div class="dynamic-item">
-							<div class="top">
-								<div class="name">泰坦尼克10001号</div>
-								<div class="level-risk">
-									<my-rate :score="4" disabled />
-									<span class="risk">一般风险</span>
-								</div>
-							</div>
-							<div class="body">
-								<div class="dynamic-info">
-									<span class="label">预计到港时间</span>
-									<span class="val">05-20 12:00</span>
-								</div>
-								<div class="dynamic-info">
-									<span class="label">作业货品</span>
-									<span class="val">92#汽油</span>
-								</div>
-								<div class="dynamic-info">
-									<span class="label">所属企业</span>
-									<span class="val">江苏南通如皋货运有限公司</span>
-								</div>
-							</div>
-						</div>
-						<div class="dynamic-item">
-							<div class="top">
-								<div class="name">泰坦尼克10001号</div>
-								<div class="level-risk">
-									<my-rate :score="5" disabled />
-									<span class="risk">一般风险</span>
-								</div>
-							</div>
-							<div class="body">
-								<div class="dynamic-info">
-									<span class="label">预计到港时间</span>
-									<span class="val">05-20 12:00</span>
-								</div>
-								<div class="dynamic-info">
-									<span class="label">作业货品</span>
-									<span class="val">92#汽油</span>
-								</div>
-								<div class="dynamic-info">
-									<span class="label">所属企业</span>
-									<span class="val">江苏南通如皋货运有限公司</span>
-								</div>
-							</div>
-						</div>
-						<div class="dynamic-item">
-							<div class="top">
-								<div class="name">泰坦尼克10001号</div>
-								<div class="level-risk">
-									<my-rate :score="3" disabled />
-									<span class="risk">一般风险</span>
-								</div>
-							</div>
-							<div class="body">
-								<div class="dynamic-info">
-									<span class="label">预计到港时间</span>
-									<span class="val">05-20 12:00</span>
-								</div>
-								<div class="dynamic-info">
-									<span class="label">作业货品</span>
-									<span class="val">92#汽油</span>
-								</div>
-								<div class="dynamic-info">
-									<span class="label">所属企业</span>
-									<span class="val">江苏南通如皋货运有限公司</span>
-								</div>
-							</div>
-						</div>
-						<div class="dynamic-item">
-							<div class="top">
-								<div class="name">泰坦尼克10001号</div>
-								<div class="level-risk">
-									<my-rate :score="3" disabled />
-									<span class="risk">一般风险</span>
-								</div>
-							</div>
-							<div class="body">
-								<div class="dynamic-info">
-									<span class="label">预计到港时间</span>
-									<span class="val">05-20 12:00</span>
-								</div>
-								<div class="dynamic-info">
-									<span class="label">作业货品</span>
-									<span class="val">92#汽油</span>
-								</div>
-								<div class="dynamic-info">
-									<span class="label">所属企业</span>
-									<span class="val">江苏南通如皋货运有限公司</span>
+									<span class="val">{{ item.chuanbojingyingren }}</span>
 								</div>
 							</div>
 						</div>
 					</div>
-					<el-pagination background small layout="prev, pager, next" :page-size="6" :total="10"></el-pagination>
+					<el-pagination
+						background
+						small
+						:current-page="currentPage"
+						@current-change="handleCurrentChange"
+						layout="prev, pager, next"
+						:page-size="pageSize"
+						:total="total"
+					></el-pagination>
 				</div>
 			</div>
 			<div class="section-bottom">
@@ -163,85 +74,52 @@
 							<li
 								v-for="(item, index) in tabList"
 								:key="index"
-								:class="[{ active: nowIndex === index }, 'tab-item']"
-								@click="selectTab(item, index)"
+								:class="[{ active: currentStatus == item.status }, 'tab-item']"
+								@click="selectTab(item)"
 							>{{ item.label }}({{ item.num }})</li>
 						</ul>
 					</div>
 					<div class="tab-content">
-						<ul class="todo-list">
-							<li class="todo-item">
+						<ul class="todo-list" v-if="todoList && todoList.length>0 ">
+							<li class="todo-item" v-for="item in todoList" :key="item.id" @click="jumpToForm(item)">
 								<p class="top">
-									<span class="todo-type">会议安排</span>
-									<span class="todo-name">业仓储业务系统培训：业务系统功能介绍</span>
+									<span class="todo-type">{{ item.workflow_title }}</span>
+									<span class="todo-name">{{ item.label }}</span>
 								</p>
 								<div class="body">
 									<div class="left">
-										<img src="../../assets/images/user.png" />
 										<div class="info">
-											<p>张小咪</p>
-											<p>发起于 04-21 12:00</p>
+											<p>{{item.created_by}}</p>
+											<p>发起于 {{item.created_at}}</p>
 										</div>
-									</div>
-									<div class="right">
-										<p>告知</p>
-										<p>更新于 04-21 12:00</p>
-									</div>
-								</div>
-							</li>
-							<li class="todo-item">
-								<p class="top">
-									<span class="todo-type">会议安排</span>
-									<span class="todo-name">业仓储业务系统培训：业务系统功能介绍</span>
-								</p>
-								<div class="body">
-									<div class="left">
-										<img src="../../assets/images/user.png" />
-										<div class="info">
-											<p>张小咪</p>
-											<p>发起于 04-21 12:00</p>
-										</div>
-									</div>
-									<div class="right">
-										<p>告知</p>
-										<p>更新于 04-21 12:00</p>
-									</div>
-								</div>
-							</li>
-							<li class="todo-item">
-								<p class="top">
-									<span class="todo-type">会议安排</span>
-									<span class="todo-name">业仓储业务系统培训：业务系统功能介绍</span>
-								</p>
-								<div class="body">
-									<div class="left">
-										<img src="../../assets/images/user.png" />
-										<div class="info">
-											<p>张小咪</p>
-											<p>发起于 04-21 12:00</p>
-										</div>
-									</div>
-									<div class="right">
-										<p>告知</p>
-										<p>更新于 04-21 12:00</p>
 									</div>
 								</div>
 							</li>
 						</ul>
-						<el-pagination background small layout="prev, pager, next" :page-size="3" :total="10"></el-pagination>
+						<no-data v-else></no-data>
+						<el-pagination
+							v-if="totalTodoNum && totalTodoNum>3"
+							background
+							small
+							:current-page="currentPage1"
+							@current-change="handleCurrentChange1"
+							layout="prev, pager, next"
+							:page-size="3"
+							:total="totalTodoNum"
+						></el-pagination>
 					</div>
 				</div>
 				<div class="echart-wrapper">
-					<pie-echart></pie-echart>
+					<pie-echart :echartData="echartLists"></pie-echart>
 					<div class="ship-total">
 						<p>船舶总数 (艘)</p>
-						<p>1,430</p>
+						<p>{{ totalNum }}</p>
 					</div>
 					<ul class="echart-list">
 						<li class="echart-item" v-for="(item, index) in echartLists" :key="index">
 							<span class="label">
 								<i class="dot" :style="{ backgroundColor: colors[index] }"></i>
-								{{ item.label }}
+								{{ item.name }}
 							</span>
 							{{ item.rate }}, {{ item.value }}
 						</li>
@@ -253,60 +131,185 @@
 </template>
 
 <script>
+
+import { $http } from '@commonbox/utils';
+
 import MyRate from '@/components/Rate';
 import PieEchart from '@/components/PieEchart';
+import NoData from '@/components/NoData';
+
+import { openFormDialog, createDialog, FormPage } from '@qycloud/lego';
+import TodoFrom from '../appDetail/xingyezilvtqcjiancha';
 
 export default {
-  components: { MyRate, PieEchart },
+  components: { MyRate, PieEchart, NoData },
   data() {
     return {
-      tabList: [
-        {
-          label: '待办工作',
-          num: 31
-        },
-        {
-          label: '最近处理',
-          num: 41
-        },
-        {
-          label: '我发起的',
-          num: 162
-        }
-      ],
+      shipList: [],
+      currentPage: 1,
+      total: 0,
+      pageSize: 6,
+      tabList: [],
+      todoList: [],
+      currentStatus: 'current',
       colors: ['#64D5A9', '#5B8FF9', '#647697', '#F6C238', '#E97059'],
-      echartLists: [
-        {
-          label: '最低风险',
-          rate: '20%',
-          value: 123
-        },
-        {
-          label: '四星风险',
-          rate: '35%',
-          value: 299
-        },
-        {
-          label: '三星风险',
-          rate: '42%',
-          value: 427
-        },
-        {
-          label: '二星风险',
-          rate: '21%',
-          value: 108
-        },
-        { label: '最高风险', rate: '5%', value: 12 }
-      ],
-      nowIndex: 0
+      echartLists: [],
+      totalNum: 0,
+      totalTodoNum: 0,
+      currentPage1: 1,
+      noticeMes: [],
+      isAnimate: false
     };
   },
-  methods: {
-    selectTab(item, index) {
-      this.nowIndex = index;
-    }
+  created() {
+    this.$bus.on('refreshData', () => {
+      this.queryTabList();
+      this.queryTabContent();
+  	});
+    setInterval(this.showMarquee, 3000);
   },
-  mounted() {}
+  methods: {
+    getNoticeMes() {
+      $http
+        .get('/sdkseaunion/portalApi/getNoticeMes')
+        .then((res) => {
+          if (res.data.status === 200) {
+            this.noticeMes = res.data.data;
+          }
+        });
+    },
+    showMarquee() {
+      this.isAnimate = true;
+      setTimeout(() => {
+        this.noticeMes.push(this.noticeMes[0]);
+        this.noticeMes.shift();
+        this.isAnimate = false;
+      }, 500);
+    },
+    getShipData() {
+      const queryParams = {
+        startPos: (this.currentPage - 1) * this.pageSize,
+        pageSize: this.pageSize
+      };
+      $http
+        .get('/sdkseaunion/portalApi/shipDynamicList', {
+          params: queryParams
+        })
+        .then((res) => {
+          if (res.data.status === 200) {
+            this.shipList = res.data.data;
+            this.total = res.data.totalCount;
+          }
+        });
+    },
+    handleCurrentChange(val) {
+      this.currentPage = val;
+      this.getShipData();
+    },
+    jumpRateDetail(item) {
+      if (item.weiyibiaoshi === '') {
+        this.$message({
+          message: '该船无评级赋分记录',
+          type: 'warning'
+        });
+        return;
+      }
+      this.$router.push({
+        path: `/rateDetail/view/${item.chuanbojingyingren}/${item.chuanming}/${item.weiyibiaoshi}`
+      });
+    },
+    queryTabList() {
+      $http.get('/sdkseaunion/portalApi/pendingWorkTotalCount').then((res) => {
+        if (res.data.status === 200) {
+          this.tabList = res.data.data;
+        }
+      });
+    },
+    selectTab(item) {
+      this.currentStatus = item.status;
+      this.queryTabContent();
+    },
+    queryTabContent() {
+      const queryParams = {
+        pageStart: this.currentPage1 - 1,
+        pageSize: 3,
+        pdType: this.currentStatus
+      };
+      $http
+        .get('/sdkseaunion/portalApi/pendingWorkByAppId', {
+          params: queryParams
+        })
+        .then((res) => {
+          if (res.data.status === 200) {
+            this.todoList = res.data.data.list;
+            this.totalTodoNum = Number(res.data.data.count);
+          }
+        });
+    },
+    jumpToForm(item) {
+      const { chuanming } = item.data.xingyezilvtqcjiancha;
+      localStorage.setItem('shipName', chuanming);
+      localStorage.setItem('jumpType', '2');
+
+      let { spaceId } = AY.getSpaceInfoOfCurrentPage();
+      const that = this;
+      openFormDialog(
+        {
+          module: 'workflow', // 所属模块
+          app: item.workflow_id, // 应用 id
+          form: item.id, // form id
+          edit: '1',
+          node: item.definition_node_key,
+          spaceId,
+          onFormAction: (ctx, { action, formData, validate, next }) => {
+            if (['CANCEL', 'DATAFLOW_CANCEL', 'WORKFLOW_CANCEL', 'SAVE_WORKFLOW'].indexOf(action) > -1) {
+              return next();
+            }
+            validate().then((result) => {
+              if (result) {
+                next();
+              }
+            });
+          }
+        },
+        {
+          title: item.workflow_title, // 弹窗标题
+          formComponent: this.getFormComponent(item.workflow_id)
+        },
+        (type) => {
+          console.log(type);
+        }
+      );
+    },
+    getFormComponent(appId) {
+      if (appId === 'xingyezilvtqcjiancha') {
+        return TodoFrom;
+      }
+      return FormPage;
+    },
+    handleCurrentChange1(val) {
+      this.currentPage1 = val;
+      this.queryTabContent();
+    },
+    getEchartData() {
+      $http.get('/sdkseaunion/portalApi/latestRatingStatistics').then((res) => {
+        if (res.data.status === 200) {
+          this.echartLists = res.data.data.data;
+          this.totalNum = res.data.data.total;
+        }
+      });
+    },
+  },
+  beforeDestroy () {
+    this.$bus.off('refreshData');
+  },
+  mounted() {
+    this.getNoticeMes();
+    this.getShipData();
+    this.getEchartData();
+    this.queryTabList();
+    this.queryTabContent();
+  }
 };
 </script>
 
@@ -335,7 +338,7 @@ $colorBlue: #1b85ff;
 .notice-wrapper {
 	width: 1280px;
 	height: 46px;
-	line-height: 46px;
+
 	margin: 0 auto 10px;
 	font-size: 14px;
 	color: #333;
@@ -349,6 +352,27 @@ $colorBlue: #1b85ff;
 		background: url('../../assets/images/notice-bg.png') no-repeat left top;
 		background-size: 100%;
 		margin-right: 10px;
+	}
+	.new-wrapper {
+		flex: 1;
+		position: relative;
+		height: 30px;
+		line-height: 30px;
+    overflow: hidden;
+	}
+	.new-list {
+		position: absolute;
+		top: 0;
+		left: 0;
+		&.marquee-top {
+			transition: all 0.5s;
+			margin-top: -30px;
+		}
+		.new-item{
+			width: 1160px;
+
+		}
+
 	}
 }
 .dynamic {
@@ -374,16 +398,19 @@ $colorBlue: #1b85ff;
 		overflow: hidden;
 	}
 	.dynamic-list {
+		height: 336px;
 		display: flex;
 		flex-wrap: wrap;
 		padding-left: 20px;
 	}
 	.dynamic-item {
 		width: 400px;
+		height: 158px;
 		background: #fff;
 		margin: 0 20px 20px 0;
 		border-radius: 2px;
 		border: 1px solid #e9e7e6;
+		cursor: pointer;
 		&:nth-child(6n - 2),
 		&:nth-child(6n - 1),
 		&:nth-child(6n) {
@@ -417,6 +444,12 @@ $colorBlue: #1b85ff;
 				font-size: 12px;
 				color: #fff;
 				margin-left: 10px;
+				&.green {
+					background: #00da62;
+				}
+				&.red {
+					background: #ff1e00;
+				}
 			}
 		}
 		.body {
@@ -449,13 +482,12 @@ $colorBlue: #1b85ff;
 .section-bottom {
 	display: flex;
 	justify-content: space-between;
-	padding: 10px 10px 0;
+	padding: 10px 0 0;
 	width: 1280px;
 	margin: 0 auto;
 }
 .todo-wrapper {
-	width: 610px;
-	// height: 416px;
+	width: 630px;
 	background: #fff;
 	.tab-wrapper {
 		display: flex;
@@ -483,7 +515,7 @@ $colorBlue: #1b85ff;
 	.todo-list {
 		padding: 0 20px;
 		.todo-item {
-			// height: 100px;
+			cursor: pointer;
 			border-bottom: 1px solid #e6e6e6;
 			.top {
 				height: 40px;
@@ -535,14 +567,13 @@ $colorBlue: #1b85ff;
 }
 .echart-wrapper {
 	position: relative;
-	width: 610px;
-	// height: 416px;
+	width: 630px;
 	padding: 20px;
 	background: #fff;
 	.ship-total {
 		position: absolute;
-		left: 176px;
-		top: 192px;
+		left: 174px;
+		top: 190px;
 		width: 94px;
 		height: 66px;
 		text-align: center;
@@ -563,6 +594,7 @@ $colorBlue: #1b85ff;
 		color: #666;
 		.echart-item {
 			height: 40px;
+			font-size: 12px;
 		}
 		.dot {
 			display: inline-block;
