@@ -1,17 +1,25 @@
 <template>
 	<div class="rate-score-wrapper">
-		<h2 class="title">检查问卷</h2>
+		<h2 class="title">{{ $route.params.wenjuanleixing === 'hylmwj' ? '行业自律' : '港口企业' }}检查问卷</h2>
+    <ul class="tab-box">
+      <li class="tab-item" :class="{'active': labelType === 'distinct'}" @click="changeLabelType('distinct')"><span>最新记录</span></li>
+      <li class="tab-item" :class="{'active': labelType === 'all'}" @click="changeLabelType('all')"><span>历史数据</span></li>
+    </ul>
 		<div class="search-area">
 			<div class="button-area">
-				<button class="btn-blue" @click="addClick">添加</button>
+				<button class="btn-blue" @click="addClick" v-if="buttonPermissions && buttonPermissions.length> 0 && buttonPermissions.includes('add')">添加</button>
+        <a class="btn-white"
+					v-if="buttonPermissions && buttonPermissions.length > 0 && buttonPermissions.includes('export')"
+					:href="`/sdkseaunion/execlExportApi/exportQuestionList?wenjuanleixing=${this.$route.params.wenjuanleixing}&labelType=${this.labelType}&searchName=${this.searchKey}&startTime=${this.date ? this.date[0]: ''}&endTime=${this.date ? this.date[1]: ''}`"
+				>导出</a>
 				<el-upload
+          v-if="buttonPermissions && buttonPermissions.length> 0 && buttonPermissions.includes('import')"
 					class="upload-demo"
 					:action="uploadUrl()"
-					:limit="1"
 					:data="uploadParams"
 					accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
-					:on-exceed="handleExceed"
 					:on-success="handleSuccess"
+          :on-error="handleError"
 					:show-file-list="false"
 				>
 					<el-button size="small" plain>导入</el-button>
@@ -19,13 +27,13 @@
 				</el-upload>
 			</div>
 			<div class="search-box">
-				<el-date-picker
+        <el-date-picker
 					size="small"
 					v-model="date"
-					type="datetimerange"
-          value-format="yyyy-MM-dd HH:mm:ss"
-					format="yyyy-MM-dd HH:mm:ss"
+					type="daterange"
 					:picker-options="pickerOptions"
+					value-format="yyyy-MM-dd"
+					format="yyyy-MM-dd"
 					range-separator="至"
 					start-placeholder="开始日期"
 					end-placeholder="结束日期"
@@ -44,15 +52,13 @@
 			<el-table-column label="船舶名称" width="220">
 				<template slot-scope="scope">
 					<el-button type="text" size="small" @click="goQuestionDetail(scope.row)">
-						{{
-						scope.row.chuanbomingcheng
-						}}
+						{{scope.row.chuanbomingcheng}}
 					</el-button>
 				</template>
 			</el-table-column>
 			<el-table-column prop="checkScore" label="检查评分" width="140">
 				<template slot-scope="scope">
-          <span :style="{ color: colorComputed(scope.row.hegezhuangtai) }">{{ scope.row.shijiedefen }}-{{ scope.row.hegezhuangtai }}</span>
+          <span :style="{ color: colorComputed(scope.row.hegezhuangtai) }">{{ scope.row.shijiedefen }}</span>
         </template>
 			</el-table-column>
 			<el-table-column prop="last_modified" label="检查时间" width="190"></el-table-column>
@@ -60,19 +66,13 @@
 			<el-table-column prop="chuanbojingyingren" label="所属企业" width="260"></el-table-column>
 			<el-table-column label="操作">
 				<template slot-scope="scope">
-					<a
-						class="link"
-						:href="
-							`/sdkseaunion/execlExportApi/inspectExport?weiyibiaoshi=${scope.row.weiyibiaoshi}`
-						"
-					>导出问卷</a>
-					<a
-						class="link"
-						:href="
-							`/sdkseaunion/execlExportApi/inspectDeductedExport?weiyibiaoshi=${scope.row.weiyibiaoshi}`
-						"
-					>导出扣分清单</a>
-					<el-button type="text" size="small" @click="deleteClick(scope.row)">删除</el-button>
+					<a class="link"	:href="	`/sdkseaunion/execlExportApi/inspectExport?weiyibiaoshi=${scope.row.weiyibiaoshi}`">导出问卷</a>
+					<a class="link"	:href="	`/sdkseaunion/execlExportApi/inspectDeductedExport?weiyibiaoshi=${scope.row.weiyibiaoshi}`">导出扣分清单</a>
+					<el-button
+            v-if="scope.row.buttonJurisdiction &&scope.row.buttonJurisdiction.length>0 &&  scope.row.buttonJurisdiction.includes('delete')"
+            type="text"
+            size="small"
+            @click="deleteClick(scope.row)">删除</el-button>
 				</template>
 			</el-table-column>
 		</el-table>
@@ -114,42 +114,41 @@ export default {
     return {
       date: '',
       pickerOptions: {
-        shortcuts: [
-          {
-            text: '最近一周',
-            onClick(picker) {
-              const end = new Date();
-              const start = new Date();
-              start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
-              picker.$emit('pick', [start, end]);
-            }
-          },
-          {
-            text: '最近一个月',
-            onClick(picker) {
-              const end = new Date();
-              const start = new Date();
-              start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
-              picker.$emit('pick', [start, end]);
-            }
-          },
-          {
-            text: '最近三个月',
-            onClick(picker) {
-              const end = new Date();
-              const start = new Date();
-              start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
-              picker.$emit('pick', [start, end]);
-            }
+        shortcuts: [{
+          text: '最近一周',
+          onClick(picker) {
+            const end = new Date();
+            const start = new Date();
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+            picker.$emit('pick', [start, end]);
           }
-        ]
+        }, {
+          text: '最近一个月',
+          onClick(picker) {
+            const end = new Date();
+            const start = new Date();
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+            picker.$emit('pick', [start, end]);
+          }
+        }, {
+          text: '最近三个月',
+          onClick(picker) {
+            const end = new Date();
+            const start = new Date();
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
+            picker.$emit('pick', [start, end]);
+          }
+        }]
       },
       tableData: [],
       searchKey: '',
       currentPage: 1,
       pageSize: 10,
       total: 0,
-      selectShipDialogVisible: false
+      selectShipDialogVisible: false,
+      labelType: 'distinct',
+      buttonPermissions: [],
+      // fileList: []
     };
   },
   computed: {
@@ -175,9 +174,11 @@ export default {
   },
   watch: {
     searchKey() {
+      this.currentPage = 1;
       utils.throttle(this.queryQuestionList());
     },
     date() {
+      this.currentPage = 1;
       utils.throttle(this.queryQuestionList());
     },
     $route(to, from) {
@@ -192,19 +193,39 @@ export default {
     uploadUrl() {
       return '/sdkseaunion/execlImportApi/importInspect';
     },
-    handleSuccess(file, fileList) {
-      let { shipName } = file.data.biaotiItems;
-      let { weiyibiaoshi } = file.data;
-      this.$router.push({
-        path: `/questionDetail/view/${shipName}/${this.$route.params.wenjuanleixing}/${weiyibiaoshi}`
-      });
+    handleSuccess(response, file, fileList) {
+      if (response.status === 500) {
+        this.$message({
+          type: 'warning',
+          message: response.errormsg
+        });
+        return; 
+      }
+      if (response.status === 200) {
+        let { shipName } = response.data.biaotiItems;
+        let { weiyibiaoshi } = response.data;
+       
+        let routeUrl = this.$router.resolve({
+          path: `/questionDetail/add/${shipName}/${this.$route.params.wenjuanleixing}/${weiyibiaoshi}`
+        });
+        window.open(routeUrl.href, '_blank');
+      }
+    },
+    handleError(err, file, fileList) {
+      this.$message.error('上传失败！');
+    },
+    changeLabelType(type) {
+      this.currentPage = 1;
+      this.labelType = type;
+      this.queryQuestionList();
     },
     async queryQuestionList() {
       const queryParams = {
         startPos: (this.currentPage - 1) * this.pageSize,
         pageSize: this.pageSize,
         searchName: this.searchKey,
-        wenjuanleixing: this.$route.params.wenjuanleixing
+        wenjuanleixing: this.$route.params.wenjuanleixing,
+        labelType: this.labelType
       };
       if (this.date) {
         queryParams.startTime = this.date[0];
@@ -215,9 +236,7 @@ export default {
       });
       this.tableData = data.data;
       this.total = data.totalCount;
-    },
-    handleDateTimerange() {
-      // this.queryQuestionList();
+      this.buttonPermissions = data.headButton;
     },
     addClick() {
       this.selectShipDialogVisible = true;
@@ -232,7 +251,7 @@ export default {
       this.selectShipDialogVisible = false;
       this.$router.push({
         path: `/questionDetail/add/${shipName}/${this.$route.params.wenjuanleixing}`
-      });
+      }); 
     },
     goQuestionDetail(item) {
       this.$router.push({
@@ -268,7 +287,6 @@ export default {
     }
   },
   mounted() {
-    /* this.type = 'questionList'; */
     this.queryQuestionList();
   }
 };
@@ -277,7 +295,6 @@ export default {
 <style lang="scss" scoped>
 .rate-score-wrapper {
 	width: 1280px;
-	// height: 600px;
 	margin: 12px auto;
 	padding: 0 20px;
 	background: #fff;
@@ -312,6 +329,7 @@ export default {
 	}
 	.el-input {
 		width: 200px;
+    margin-left: 10px;
 	}
 	.el-date-editor--datetimerange.el-input__inner {
 		width: 350px;

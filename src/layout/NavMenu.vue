@@ -32,23 +32,32 @@ export default {
   },
   data() {
     return {
-      refresh: false
+
     };
   },
-
   methods: {
     clickMenu(menu) {
       localStorage.setItem('jumpType', '1');
-      if (menu.app_type === 'link') {
-        this.$router.push({
+      this.$store.commit('TOGGLE_SCREEN', 0); // 点菜单就是小屏
+      if (menu.app_type === 'link' && menu.link.indexOf('paaslink') === -1) {
+        let routeUrl = this.$router.resolve({
           path: menu.link
         });
+        window.open(routeUrl.href, '_blank');
+      } else if (menu.app_type === 'link' && menu.link.indexOf('paaslink') > -1) {
+        let url = window.globalConfig.server.www + menu.link.replace('/paaslink/', '');
+        let routeUrl = this.$router.resolve({
+          path: '/iframContainer',
+          query: { link: url }
+        });
+        window.open(routeUrl.href, '_blank');
       } else if (menu.app_type === 'information' || menu.app_type === 'workflow') {
-        // ��ƽ̨����
+        // 走平台配置
         let { spaceId } = AY.getSpaceInfoOfCurrentPage();
-        this.$router.push({
+        let routeUrl = this.$router.resolve({
           path: `/appList/${menu.app_type}/${menu.app_id}/${spaceId}`
         });
+        window.open(routeUrl.href, '_blank');
       }
     }
   }

@@ -13,18 +13,11 @@ const user = {
     },
   },
   actions: {
-    login({
-      commit
-    }, loginForm) {
+    login({ commit }, loginForm) {
       return new Promise((resolve, reject) => {
         $http.post('/sdkseaunion/loginApi/login', loginForm).then((res) => {
-          if (res.data.status === 200) {
+          if (res.data) {
             resolve(res.data);
-          } else {
-            this.$notify.error({
-              title: '错误提示',
-              message: res.data.errormsg,
-            });
           }
         }).catch((error) => {
           reject(error);
@@ -32,11 +25,9 @@ const user = {
       });
     },
 
-    layout({
-      commit
-    }) {
+    layout({ commit }) {
       return new Promise((resolve, reject) => {
-        $http.post('/assso/loginApi/exit').then((res) => {
+        $http.post('/sdkseaunion/loginApi/exit').then((res) => {
           if (res.data.status === 200 && res.data.data.flag === true) {
             commit('SET_USER_INFO', {});
             router.push({
@@ -46,11 +37,9 @@ const user = {
         });
       });
     },
-    getUserInfo({
-      commit
-    }) {
+    getUserInfo({ commit }) {
       return new Promise((resolve, reject) => {
-        $http.get('/assso/userApi/getUserInfo').then((res) => {
+        $http.get('/sdkseaunion/userApi/getUserInfo').then((res) => {
           if (res.data.status === 200) {
             const { data } = res.data;
             commit('SET_USER_INFO', data);

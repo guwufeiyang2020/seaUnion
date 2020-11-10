@@ -14,13 +14,13 @@
 						>主管部门</li>
 						<li
 							class="login-title-item"
-							:class="{'active' : loginType == 'qy' }"
-							@click="loginType = 'qy'"
-						>码头业主</li>
-						<li
-							class="login-title-item"
 							:class="{'active' : loginType == 'cz' }"
 							@click="loginType = 'cz'"
+						>港口企业</li>
+						<li
+							class="login-title-item"
+							:class="{'active' : loginType == 'qy' }"
+							@click="loginType = 'qy'"
 						>航运企业</li>
 					</ul>
 					<div class="login-body">
@@ -50,16 +50,17 @@
 							<el-button type="primary" :loading="loading" style="width:100%;" @click="handleLogin">登录</el-button>
 						</el-form>
 						<div class="login-footer">
-							<el-checkbox v-model="rememberPassword">记住密码</el-checkbox>
+							<el-checkbox v-model="rememberPassword">记住用户名</el-checkbox>
 						</div>
-						<a href="#" class="link">进入中化物流港系统>>></a>
+						<!-- <a href="https://www.sinochemlogistics.com/bee/portal/newPortal/login" target="_blank" class="link">进入中化物流港系统>>></a> -->
 					</div>
 				</div>
 			</div>
 		</div>
 		<div class="login-bottom">
-			主办单位：舟山海事局 中化兴中石油转运（舟山）有限公司
-			<br />技术支持：中化安元应急管理技术（舟山）有限公司
+			<p><span class="main-company">主办单位：舟山海事局</span> 中化兴中石油转运（舟山）有限公司</p>
+			<p>技术支持：中安科创（舟山）有限公司</p>
+			<p class="copyright"><i class="icon-copyright"></i>浙ICP备2020033851号</p>
 		</div>
 	</div>
 </template>
@@ -94,7 +95,7 @@ export default {
         verifycode: ''
       },
       loginType: 'hs',
-      identifyCodes: '1234567890ABCDEFGHIGKLMNOPQRSTUVWXYZ',
+      identifyCodes: '1234567890',
       identifyCode: '',
       rememberPassword: true,
       loading: false,
@@ -138,18 +139,33 @@ export default {
             if (res.status === 200) {
               this.$store.commit('SET_USER_INFO', res.data.onlineUserInfo);
               this.$router.push({ path: '/' });
+            } else if (res.status === 500) {
+              this.$message.error(res.data);
             }
+          }).catch((error) => {
+	
           });
         } else {
           return false;
         }
       });
+    },
+    keyDown(e) {
+      // 如果是回车则执行登录方法
+      if (e.keyCode === 13) {
+        this.handleLogin();
+      }
     }
   },
   mounted() {
     // 验证码初始化
     this.identifyCode = '';
     this.makeCode(this.identifyCodes, 4);
+		 // 绑定事件
+    window.addEventListener('keydown', this.keyDown);
+  },
+  destroyed() {
+    window.removeEventListener('keydown', this.keyDown, false);
   }
 };
 </script>
@@ -162,7 +178,7 @@ export default {
 	align-items: center;
 	margin: 0 auto;
 	.logo {
-		width: 506px;
+		width: 287px;
 		height: 70px;
 	}
 }
@@ -179,7 +195,7 @@ export default {
 }
 .login-box {
 	width: 380px;
-	height: 440px;
+	// height: 440px;
 	padding-top: 16px;
 	background: rgba(255, 255, 255, 0.6);
 	border: 1px solid #fff;
@@ -229,7 +245,7 @@ export default {
 		height: 50px;
 	}
 	/deep/ .el-input {
-		width: 192px;
+		width: 204px;
 		margin-right: 10px;
 		float: left;
 		/deep/ .el-input__inner {
@@ -269,5 +285,24 @@ export default {
 	text-align: center;
 	color: #626467;
 	line-height: 26px;
+	font-size: 14px;
+	.main-company {
+		margin-right: 10px;
+	}
+	.copyright {
+		width: 240px;
+		height: 30px;
+		display: flex;
+		align-items: center;
+		margin: 0 auto;
+	}
+	.icon-copyright {
+		display: block;
+		width: 20px;
+		height: 20px;
+		background: url('../../assets/images/badge.png') no-repeat left center;
+		background-size: 100%;
+		margin-right: 10px;
+	}
 }
 </style>

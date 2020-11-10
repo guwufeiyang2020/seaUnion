@@ -1,5 +1,5 @@
 <template>
-	<div class="no-data" >
+	<div class="no-data">
     <img src="../assets/images/no-work2.png" />
     <p>暂无数据</p>
   </div>
@@ -9,7 +9,7 @@
 .no-data {
     width: 100%;
     height: 100%;
-    margin-top: 50px;
+    padding-top: 50px;
     text-align: center;
     font-size: 16px;
     color: #363b40;

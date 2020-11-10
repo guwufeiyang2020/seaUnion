@@ -11,10 +11,26 @@
     margin: 0 auto;
 }
 
-.AppList_Main {
+.no-data {
+    width: 100%;
+    height: 100%;
+    margin-top: 50px;
+    text-align: center;
+    font-size: 16px;
+    color: #363b40;
+    line-height: 30px;
+}
+
+.AppList_Main,
+.base-page {
     width: 1280px !important;
     margin: 12px auto !important;
     height: calc(100% - 24px) !important;
+    background: #fff !important;
+}
+
+.form {
+    background: #fff !important;
 }
 
 // 清除浮动
@@ -30,20 +46,6 @@
     *zoom: 1;
 }
 
-// 单行溢出省略
-.txt-ellipsis {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-// 两行文本溢出
-.two-line {
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-    overflow: hidden;
-}
 
 // 滚动条样式
 ::-webkit-scrollbar {
@@ -76,6 +78,17 @@
     margin-right: 6px;
 }
 
+.btn-white {
+    height: 32px;
+    line-height: 28px;
+    padding: 0 17px;
+    background: #fff;
+    color: #333;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    margin-right: 6px;
+}
+
 .btn-default {
     height: 30px;
     line-height: 28px;
@@ -90,4 +103,39 @@
 // 学员表格样式
 .el-table th {
     background: #f2f6f9;
+}
+
+.tab-box {
+    height: 40px;
+    margin-bottom: 20px;
+    display: flex;
+    border-bottom: 1px solid #e4e7ed;
+    .tab-item {
+        border: 1px solid #e4e7ed;
+        margin-right: -1px;
+        border-bottom: none;
+        width: 100px;
+        height: 39px;
+        font-size: 14px;
+        position: relative;
+        cursor: pointer;
+        span {
+            position: absolute;
+            top: 0;
+            display: block;
+            width: 100%;
+            height: 38px;
+            line-height: 39px;
+            text-align: center;
+            background: #fff;
+        }
+        &.active {
+            border-top: 2px solid #409eff;
+            color: #409eff;
+            font-weight: bold;
+            span {
+                top: 1px;
+            }
+        }
+    }
 }

@@ -4,8 +4,10 @@
 			:module="module"
 			:app="app"
 			:form="form"
+      :edit="edit"
 			:node="node"
 			:spaceId="spaceId"
+      :isCopy="isCopy"
 			:after-form-finished="afterFormFinished"
 			@form-action="onFormAction"
 			@on-init="onInitCallBack"
@@ -23,7 +25,7 @@
 <script>
 import Vue from 'vue';
 import { ComponentxPlugin } from '@qycloud/lego';
-import BaseForm from './BaseForm.vue';
+import BaseForm from './BaseForm1.vue';
 
 Vue.use(ComponentxPlugin);
 
@@ -33,7 +35,7 @@ export default {
     return {};
   },
   xComponents: {},
-  props: ['module', 'app', 'spaceId', 'form', 'node'],
+  props: ['module', 'app', 'spaceId', 'form', 'node', 'edit', 'isCopy'],
   components: {
     BaseForm
   },
@@ -62,7 +64,7 @@ export default {
     onFieldPropertyChange() {},
     onSlaveTablePropertyChange() {},
     onCrumbItemClick(options, ctx) {
-      console.log(options, ctx);
+      // console.log(options, ctx);
     },
     onSlaveFormAction(ctx, { formData, validate, next }) {
       validate().then((result) => {

@@ -24,23 +24,12 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.wrapper {
-	/* position: absolute;
-	top: 0;
-	right: 0;
-	bottom: 0;
-	left: 0;
-	overflow: hidden; */
-}
 .main-box {
-	// position: relative;
-	// padding: 20px;
 	position: absolute;
 	top: 60px;
 	width: 100%;
 	min-width: 1300px;
 	bottom: 0;
 	left: 0;
-	// overflow: auto;
 }
 </style>

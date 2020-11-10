@@ -1,6 +1,6 @@
 <template>
 	<div class="select-ship-wrapper">
-		<el-form :model="formData" :rules="rules" ref="SelectShipForm" label-width="140px">
+		<el-form :model="formData" :rules="rules" ref="SelectShipForm" label-width="154px">
 			<el-form-item label="船舶：" prop="shipId">
 				<el-select v-model="formData.shipId" placeholder="请选择" filterable @change="changeShip">
 					<el-option
@@ -11,7 +11,7 @@
 					></el-option>
 				</el-select>
 			</el-form-item>
-			<el-form-item label="船舶识别号码：">{{shipNumber}}</el-form-item>
+			<el-form-item label="IMO/MMSI/识别号：">{{shipNumber}}</el-form-item>
 			<el-form-item label="总吨位/载重吨：">{{shipWeight}}</el-form-item>
 			<el-form-item label="船舶种类(闪点)：">{{shipType}}</el-form-item>
 		</el-form>

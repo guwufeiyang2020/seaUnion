@@ -5,12 +5,15 @@
 				<el-breadcrumb-item :to="{ path: '/rateList' }">评级赋分</el-breadcrumb-item>
 				<el-breadcrumb-item>{{$route.params.mode === 'add'? '新增': '查看'}}评级赋分</el-breadcrumb-item>
 			</el-breadcrumb>
-			<h2 class="title">{{$route.params.mode === 'add'? '新增': '查看'}}评级赋分</h2>
+			<h2 class="title">{{$route.params.mode === 'add'? '新增': '查看'}}评级赋分
+				<span class="ship-name"><i class="icon-ship"></i>{{$route.params.name}}</span>
+			</h2>
+			<button class="btn-blue" @click="showHistory">历史记录评级</button>
 		</div>
 		<div class="page-body">
 			<div class="page-left" v-if="shipInfos && shipInfos.length> 0">
 				<section class="section" v-for="(shipInfo, index) in shipInfos" :key="index">
-					<h3 class="factor-name">{{ shipInfo.yinsufenlei }}({{ shipInfo.quanzhong }})</h3>
+					<h3 class="factor-name">{{ shipInfo.yinsufenlei }}({{ shipInfo.quanzhong }}%)</h3>
 					<ul class="schedule-list">
 						<li class="schedule-title">
 							<div>影响因素</div>
@@ -37,7 +40,7 @@
 											<div class="lecturer">
 												{{thirdItem.fufenzhi}}
 												<i
-													v-if="item.canAddScore"
+													v-if="$route.params.mode === 'add' && item.canAddScore"
 													class="my-radio"
 													:class="[thirdItem.isChecked ? 'is-checked' : '']"
 													@click="selectScore(shipInfo, item, subItem, thirdItem)"
@@ -54,7 +57,7 @@
 						</li>
 						<li class="total-weight">
 							<div>权重得分(实际得分*{{ shipInfo.quanzhong }}%)</div>
-							<div>{{ $route.params.mode === 'add'? totalWeight(shipInfo) : shipInfo.weightTotalScore }}</div>
+							<div>{{ $route.params.mode === 'add'? totalWeight(shipInfo) : parseInt(shipInfo.weightTotalScore) }}</div>
 						</li>
 					</ul>
 				</section>
@@ -62,7 +65,7 @@
 			<ul
 				class="position-nav"
 				:class="{ 'fixed-menu': fixedMenu }"
-				v-if="shipInfos && shipInfos.length>0"
+				v-if="shipInfos && shipInfos.length > 0"
 			>
 				<li
 					class="nav-item"
@@ -70,13 +73,14 @@
 					@click="clickMenu(index)"
 					v-for="(shipInfo, index) in shipInfos"
 					:key="index"
-				>{{ shipInfo.yinsufenlei }}({{ shipInfo.quanzhong }})</li>
+				>{{ shipInfo.yinsufenlei }}({{ shipInfo.quanzhong }}%)</li>
 			</ul>
 		</div>
 		<div class="button-area">
-			<button class="btn-blue" @click="calcScore">{{$route.params.mode === 'add' ? '提交并计算综合得分': '查看综合得分'}}</button>
+			<button class="btn-blue" @click="calcScore" v-if="$route.params.mode === 'add'">提交并计算综合得分</button>
+			<button class="btn-blue" @click="viewScore" v-if="$route.params.mode === 'view'">查看综合得分</button>
 			<button class="btn-blue" @click="submitAddScore" v-if="$route.params.mode === 'add'">提交</button>
-			<button class="btn-default" v-if="$route.params.mode === 'add'" @click="backToList">取消</button>
+			<button class="btn-default" @click="backToList" v-if="$route.params.mode === 'add'" >取消</button>
 		</div>
 		<!-- 模态框 -->
 		<div class="model-wrapper" v-if="showResultModel">
@@ -88,6 +92,50 @@
 			</div>
 			<div class="mask"></div>
 		</div>
+		<el-dialog title="历史评级" :visible.sync="dialogVisible" width="700px">
+			<div style="overflow: auto;">
+				<el-table :data="gridData" v-if="gridData && gridData.length > 0">
+					<el-table-column label="船舶名称">
+						<template slot-scope="scope">
+							<el-button
+								type="text"
+								size="small"
+								@click="goRateDetail(scope.row)"
+							>{{ scope.row.chuanbomingcheng }}</el-button>
+						</template>
+					</el-table-column>
+					<el-table-column label="风险等级" width="180">
+						<template slot-scope="scope">
+							<my-rate :score="Number(scope.row.xingji)" disabled />
+						</template>
+					</el-table-column>
+					<el-table-column prop="quanzhongzongfen" label="综合评分"></el-table-column>
+					<el-table-column prop="pingfenshijian"  width="180" label="评分时间"></el-table-column>
+					<el-table-column label="操作">
+						<template slot-scope="scope">
+							<a class="link"	:href="`/sdkseaunion/execlExportApi/ratingExport?weiyibiaoshi=${scope.row.weiyibiaoshi}`">导出</a>
+							<a class="link"	v-if="scope.row.buttonJurisdiction && scope.row.buttonJurisdiction.length > 0 && scope.row.buttonJurisdiction.includes('delete')"
+								@click="deleteClick(scope.row)">删除</a>
+						</template>
+					</el-table-column>
+				</el-table>
+				<div class="no-data" v-else>
+					<img src="../../assets/images/no-work2.png" />
+					<p>暂无数据</p>
+				</div>
+			</div>
+			<el-pagination
+				v-if="gridData.length"
+				background
+				@size-change="handleSizeChange"
+				@current-change="handleCurrentChange"
+				:page-sizes="[10,20,30]"
+				:current-page="pageNum"
+				:page-size="pageSize"
+				layout="total, sizes, prev, pager, next"
+				:total="total"
+			></el-pagination>	
+		</el-dialog>
 	</div>
 </template>
 
@@ -107,7 +155,12 @@ export default {
       showResultModel: false,
       hasEmpty: false,
       resultDesc: '',
-      rateLevel: 0
+      rateLevel: 0,
+      dialogVisible: false,
+      gridData: [],
+      pageNum: 1,
+      pageSize: 10,
+      total: 0
     };
   },
   computed: {
@@ -158,6 +211,62 @@ export default {
     }
   },
   methods: {
+    goRateDetail(item) {
+      this.$router.push({
+        path: `/rateDetail/view/${item.chuanbojingyingren}/${item.chuanbomingcheng}/${item.weiyibiaoshi}`
+      }); 
+    },
+    deleteClick(item) {
+      if (this.$route.params.id === item.weiyibiaoshi) {
+						 this.$message({
+          type: 'error',
+          message: '该记录不能删除!'
+        });
+        return;
+      }
+      this.$confirm('确定删除吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(() => {
+          $http
+            .post('/sdkseaunion/ratingApi/delRatingItems', { weiyibiaoshi: item.weiyibiaoshi })
+            .then((rspData) => {
+              this.$message({
+                type: 'success',
+                message: '删除成功!'
+              });
+              this.searchHistoryData();
+            });
+        })
+        .catch(() => {});
+    },
+    handleSizeChange(val) {
+      this.pageSize = val;
+      this.searchHistoryData();
+    },
+    handleCurrentChange(val) {
+      this.pageNum = val;
+      this.searchHistoryData();
+    },
+    // 查看历史评级
+    showHistory() {
+      this.dialogVisible = true;
+      this.pageNum = 1;
+      this.pageSize = 10;
+      this.total = 0;
+      this.searchHistoryData();
+    },
+    searchHistoryData() {
+      let url = `/sdkseaunion/ratingApi/ratingList?startPos=${(this.pageNum - 1) * this.pageSize}&pageSize=${this.pageSize}&searchName=${this.$route.params.name}&labelType=all`;
+      this.$http.get(url).then((res) => {
+        if (res.status === 200) {
+          this.gridData = res.data.data;
+          this.total = res.data.totalCount;
+        }
+      });
+    },
     clickMenu(index) {
       this.menuClickIndex = index;
       const jump = document.querySelectorAll('.section');
@@ -221,16 +330,23 @@ export default {
     },
     mouseleaveItem(thirdItem) {
       if (!thirdItem.isChecked) {
- 				thirdItem.canHover = false;
-      	thirdItem.isChecked = false;
+        thirdItem.canHover = false;
+        thirdItem.isChecked = false;
       }
     },
     selectScore(shipInfo, item, subItem, thirdItem) {
-      subItem.thirdList.forEach((item5) => {
-        item5.canHover = false;
-        item5.isChecked = false;
-      });
       thirdItem.isChecked = !thirdItem.isChecked;
+      // 如果选中
+      if (thirdItem.isChecked) {
+        let newList = [];
+        newList = subItem.thirdList.filter(
+          item4 => item4.fufenbiaozhun !== thirdItem.fufenbiaozhun
+        );
+        newList.forEach((item4) => {
+          item4.canHover = false;
+          item4.isChecked = false;
+        });
+      }
       if (thirdItem.isChecked) {
         this.$set(thirdItem, 'selectFufenzhi', thirdItem.fufenzhi);
         item.shijidefen = thirdItem.fufenzhi;
@@ -279,6 +395,21 @@ export default {
           }
         });
     },
+    viewScore() {
+      this.showResultModel = true;
+      $http
+        .get('/sdkseaunion/ratingApi/ratingMesView', {
+          params: {
+            weiyibiaoshi: this.$route.params.id
+          }
+        })
+        .then((res) => {
+          if (res.status === 200) {
+            this.resultDesc = res.data.data.desc;
+            this.rateLevel = parseInt(res.data.data.xingji, 10);
+          }
+        });
+    },
     submitAddScore() {
       this.checkScore();
       if (this.hasEmpty) {
@@ -299,14 +430,14 @@ export default {
             });
             this.$router.push({
               path: '/rateList'
-            });
+            }); 
           }
         });
     },
     backToList() {
       this.$router.push({
         path: '/rateList'
-      });
+      }); 
     }
   },
   watch: {
@@ -325,6 +456,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+a {
+	cursor: pointer;
+}
 .rate-score-wrapper {
 	width: 1280px;
 	min-height: calc(100vh - 100px);
@@ -332,14 +466,39 @@ export default {
 	background: #fff;
 }
 .page-top {
+	position: relative;
 	height: 80px;
 	border-bottom: 1px solid #e6e6e6;
 	padding: 0 24px;
+	.btn-blue {
+		position: absolute;
+		top: 30px;
+		right: 10px;
+	}
 	.title {
 		height: 26px;
 		line-height: 26px;
 		color: #000;
 		font-size: 18px;
+		.ship-name {
+			display: inline-block;
+			height: 30px;
+			margin-left: 10px;
+			padding: 0 10px;
+			color: #0050B3;
+			font-size: 14px;
+			background: #EAF7FF;
+			font-family: MicrosoftYaHei-Bold, MicrosoftYaHei;
+			.icon-ship {
+				display: inline-block;
+				width: 22px;
+				height: 22px;
+				background: url('../../assets/images/icon-ship.png') no-repeat left top;
+				background-size: 100% 100%;
+				vertical-align: middle;
+				margin-right: 6px;
+			}
+		}
 	}
 	.el-breadcrumb {
 		height: 38px;
@@ -464,6 +623,8 @@ export default {
 		justify-content: center;
 		align-items: center;
 		padding: 8px;
+		font-size: 18px;
+		font-weight: bold;
 		.contentedit-content {
 			width: 100%;
 			height: 100%;
@@ -498,7 +659,7 @@ export default {
 					border-bottom: 1px solid #eee;
 					cursor: pointer;
 					.my-radio {
-						display: none;
+						// display: none;
 						width: 18px;
 						height: 18px;
 						background: url('../../assets/images/icon-checknot.png');
@@ -509,8 +670,8 @@ export default {
 
 					&.hover {
 						background: rgba(27, 133, 255, 0.1);
-						.my-radio {
-							display: block;
+						.lecturer {
+							color: #005bac;
 						}
 					}
 					&:last-child {
@@ -574,6 +735,10 @@ export default {
 	text-align: center;
 	padding-top: 20px;
 }
+.el-pagination {
+	text-align: right;
+	margin-top: 10px;
+}
 /* 模态弹窗 */
 .model-wrapper {
 	.model {
@@ -620,5 +785,9 @@ export default {
 		z-index: 1;
 		background: #000;
 	}
+}
+.link {
+	margin-right: 5px;
+	font-size: 12px;
 }
 </style>

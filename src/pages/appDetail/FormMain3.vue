@@ -4,7 +4,7 @@
 
 <script>
 import xingyezilvtqcjiancha from './xingyezilvtqcjiancha.vue';
-import DefaultForm from './BaseFormPage.vue';
+import DefaultForm from './BaseFormPage2.vue';
 
 export default {
   name: 'FormMain',
@@ -18,6 +18,8 @@ export default {
         module: this.$route.params.module,
         app: this.$route.params.appId,
         form: this.$route.params.form,
+        edit: this.$route.params.edit,
+        isCopy: this.$route.query.isCopy,
         // node: this.$route.params.node,
         spaceId: this.$route.params.spaceId
       };
@@ -27,6 +29,9 @@ export default {
         ? this.$route.params.appId
         : 'DefaultForm';
     }
+  },
+  created() {
+    // console.log(this.$route.params, '=======');
   },
   mounted() {
     // console.log(this.$route.params);

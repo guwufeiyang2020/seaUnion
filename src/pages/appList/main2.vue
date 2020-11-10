@@ -5,7 +5,7 @@
 <script>
 import { ComponentxPlugin } from '@qycloud/lego';
 import Vue from 'vue';
-import DefaultList from './base.vue';
+import DefaultList from './base1.vue';
 
 Vue.use(ComponentxPlugin);
 

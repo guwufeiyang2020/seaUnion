@@ -1,7 +1,6 @@
 <template>
-	<!-- 头部 :class="{'header-big': showBigScreen}" -->
 	<div class="header-wrapper">
-		<div class="header-content">
+		<div class="header-content" :class="{'header-big': showBigScreen}">
 			<img src="../assets/images/logo.png" class="logo" @click="jumpHome" />
 			<div class="login-area">
 				<!-- 递归菜单 -->
@@ -10,10 +9,9 @@
 				</el-menu>
 				<!-- 递归菜单结束 -->
 				<div class="line"></div>
-
 				<el-dropdown v-if="userInfo && userInfo.realName">
 					<div class="el-dropdown-link">
-						<img :src="userImg" class="user-img" />
+						<img :src="userInfo.userHeadPicUrl" class="user-img" />
 						{{ userInfo.realName }}
 						<i class="ad" ref="guanliyuan"></i>
 					</div>
@@ -22,7 +20,7 @@
 						<el-dropdown-item @click.native="layout">退出</el-dropdown-item>
 					</el-dropdown-menu>
 				</el-dropdown>
-				<button class="toggle-screen" @click="toggleScreen">{{showBigScreen ? "退出大屏模式": "开启大屏模式"}}</button>
+				<button class="toggle-screen" @click="toggleScreen" v-if="userInfo.userOrgType && userInfo.userOrgType ==='主管部门'">{{showBigScreen ? "退出大屏模式": "开启大屏模式"}}</button>
 			</div>
 		</div>
 	</div>
@@ -31,6 +29,7 @@
 <script>
 import { mapState } from 'vuex';
 import NavMenu from '@/layout/NavMenu';
+import { $http } from '@commonbox/utils';
 
 export default {
   name: 'VHeader',
@@ -39,9 +38,9 @@ export default {
   },
   data() {
     return {
-      userImg: require('../assets/images/user.png'),
       operateMenus: [],
-      showBigScreen: false
+      showBigScreen: false,
+      // userType: ''
     };
   },
   computed: {
@@ -56,8 +55,10 @@ export default {
     layout() {
       this.$store.dispatch('layout');
     },
+    // 链接平台个人中心页
     jumpUserInfo() {
- 			const dominUrl = window.globalConfig.server.www;
+      const dominUrl = window.globalConfig.server.www;
+      console.log(dominUrl);
       const linkUrl = `${dominUrl}space-${window.AY.getSpaceId()}/user/setting?nakedLayout=1`;
       let routeUrl = this.$router.resolve({
         path: '/iframContainer',
@@ -65,11 +66,14 @@ export default {
       });
       window.open(routeUrl.href, '_blank');
     },
+    // 点logo跳到首页
     jumpHome() {
+      this.$store.commit('TOGGLE_SCREEN', 0);
       this.$router.push({
         path: '/index'
       });
     },
+    // 切换大屏、小屏
     toggleScreen() {
       this.showBigScreen = !this.showBigScreen;
       if (this.showBigScreen) {
@@ -87,6 +91,7 @@ export default {
         });
       }
     },
+    // 初始化菜单
     initData() {
       this.$store.dispatch('queryMenuList').then((asideMenu) => {
         if (asideMenu) {
@@ -107,14 +112,32 @@ export default {
           }
         }
       });
+    },
+    setScreenType() {
+      if (Number(this.isBigScreen) === 1) {
+        this.showBigScreen = true;
+      } else {
+        this.showBigScreen = false;
+      }
+    },
+    /* getUserType() {
+      $http
+        .get('/sdkseaunion/portalApi/getUserType')
+        .then((res) => {
+          if (res.status === 200) {
+            this.userType = res.data.data.userType;
+          }
+        });
+    } */
+  },
+  watch: {
+    $route(to, from) {
+      this.setScreenType();
     }
   },
   mounted() {
-    if (Number(this.isBigScreen) === 1) {
-      this.showBigScreen = true;
-    } else {
-      this.showBigScreen = false;
-    }
+    // this.getUserType();
+    this.setScreenType();
     this.initData();
   }
 };
@@ -140,7 +163,7 @@ export default {
 	}
 }
 .logo {
-	width: 250px;
+	width: 200px;
 	cursor: pointer;
 }
 .login-area {

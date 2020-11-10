@@ -26,7 +26,7 @@ const menu = {
             let asideMenu = res.data.data;
             commit('QUERY_MENU', asideMenu);
             resolve(asideMenu);
-          } else if (res.data.status === 500 && res.data.errormsg === 'µÇÂ¼¹ıÆÚ£¬ÇëÖØĞÂµÇÂ¼') {
+          } else if (res.data.status === 500 && res.data.errormsg === 'ç™»å½•è¿‡æœŸï¼Œè¯·é‡æ–°ç™»å½•') {
             router.push({
               path: '/login'
             });

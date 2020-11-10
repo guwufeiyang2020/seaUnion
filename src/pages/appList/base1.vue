@@ -1,38 +1,36 @@
 <script>
 import { AppView } from '@qycloud/lego';
 import { intersection } from 'lodash';
+import baseFunction from './baseFunction.js';
 
 export default {
   name: 'my-app-list',
   extends: AppView,
-
+  mixins: [baseFunction],
   data() {
     return {
       id: ''
-
-      /* 	module: this.$route.params.module,
-			appId: this.$route.params.appId,
-			spaceId: this.$route.params.spaceId */
     };
   },
   methods: {
     onOpenForm(data) {
-      console.log(data);
-
+      console.log('data', data);
       this.vms = [];
       this.id = data.id;
 
-      let form = data.instance_id ? data.instance_id : data.id;
+      let form = data.id ? data.id : '';
       let node = data.node ? data.node : '';
+      let edit = data.edit ? data.edit : '0'; // 1是编辑，0是详情
 
-      // console.log('form', form);
-      // console.log('node', node);
-
-      this.$router.push({
-        path: `/detail/${this.$route.params.module}/${this.$route.params.appId}/${
-          data.spaceId
-        }/${form || ''}`
-      });
+      if (edit === '1') {
+        this.$router.push({
+          path: `/detail/${this.$route.params.module}/${this.$route.params.appId}/${data.spaceId}/${edit}/${form}`
+        });
+      } else {
+        this.$router.push({
+          path: `/detail/${this.$route.params.module}/${this.$route.params.appId}/${data.spaceId}/${edit}/${form}/${node}`
+        });
+      }
     }
   },
   created() {

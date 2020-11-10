@@ -16,10 +16,10 @@
   function setRemUnit() {
     let rem;
     if (docEl.clientWidth > 1200) {
-      rem = docEl.clientWidth / 10;
+      rem = docEl.clientWidth / 19.2;
       docEl.style.fontSize = `${rem}px`;
     } else {
-      docEl.style.fontSize = '120px';
+      docEl.style.fontSize = '62.5px';
     }
   }
 

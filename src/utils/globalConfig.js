@@ -2,16 +2,18 @@ import {
   $http
 } from '@commonbox/utils';
 
-const setUser = async () => {
+const setUser = async() => {
   const {
     data: {
       result
     }
   } = await $http.get('/api2/user/info');
   window.globalConfig.user = result;
+  window.globalConfig.user.name = result.realName;
+  window.globalConfig.user.id = result.userId;
 };
 
-const setFileMaxSize = async () => {
+const setFileMaxSize = async() => {
   if (!window.globalConfig.maxFileSize) {
     const {
       data: {
@@ -22,7 +24,7 @@ const setFileMaxSize = async () => {
   }
 };
 
-const setAttachService = async () => {
+const setAttachService = async() => {
   if (!window.globalConfig.attachService) {
     const {
       data: {
@@ -32,13 +34,14 @@ const setAttachService = async () => {
     window.globalConfig.attachService = result;
   }
 };
-export const patchGlobalConfig = async () => {
+export const patchGlobalConfig = async() => {
   try {
     await setUser();
     await setFileMaxSize();
     await setAttachService();
     return 200;
   } catch (e) {
+    // console.log(e);
     return e.response.status;
   }
 };

@@ -1,5 +1,5 @@
 <template>
-	<div style="width: 100%; height: 100%" id="echart">echart</div>
+	<div style="width: 100%; height: 100%" id="echart">加载中</div>
 </template>
 
 <script>
@@ -64,6 +64,7 @@ export default {
         yAxis: [
           {
             type: 'value',
+            minInterval: 1,
             axisLine: {
               lineStyle: {
                 color: 'rgba(255, 255, 255, 0.2)'
@@ -97,23 +98,19 @@ export default {
       this.initChartData();
       if (this.echart) {
         this.echart.setOption(this.options);
-        // 设置表格的点击事件进行路由的切换
-        this.echart.on('click', (param) => {
-          console.log('弹窗');
-        });
       } else {
         this.echart = echarts.init(document.getElementById('echart'));
         this.echart.setOption(this.options);
-        // 设置表格的点击事件进行路由的切换
-        this.echart.on('click', (param) => {
-          console.log('弹窗');
-        });
       }
+      this.echart.on('click', (param) => {
+        this.$emit('openPopup', param);
+      });
     },
     initChartData() {
       if (this.isAxisChart) {
         this.axisOption.xAxis.data = this.chartData.xData;
         this.axisOption.series = this.chartData.series;
+        this.axisOption.legend = this.chartData.legend;
       } else {
         this.normalOption.series = this.chartData.series;
       }

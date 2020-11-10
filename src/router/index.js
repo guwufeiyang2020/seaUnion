@@ -2,22 +2,16 @@ import Vue from 'vue';
 import VueRouter from 'vue-router';
 import '../utils/install';
 import NProgress from 'nprogress'; // progress bar
-import {
-  patchGlobalConfig
-} from '../services/globalConfig';
+import { GlobalPlugin } from '@qycloud/vue-plugin-global';
+import { patchGlobalConfig } from '../utils/globalConfig';
+// import { checkSession } from '../utils/checkSession.js';
 import store from '../store/index';
-import {
-  routers
-} from './routers';
-
+import { routers } from './routers';
 import 'nprogress/nprogress.css'; // progress bar style
 import util from '../utils/util';
 
-NProgress.configure({
-  showSpinner: false,
-});
-
-
+NProgress.configure({ showSpinner: false });
+Vue.use(GlobalPlugin);
 Vue.use(VueRouter);
 
 const router = new VueRouter({
@@ -30,9 +24,8 @@ const whiteList = ['/login', '/404', '/appCenter'];
 router.beforeEach(async(to, from, next) => {
   await patchGlobalConfig();
   NProgress.start();
-  const {
-    userInfo
-  } = store.state.user;
+  // console.log(checkSession());
+  const { userInfo } = store.state.user;
   if (!util.isEmptyObject(userInfo)) { // 有token
     next();
     NProgress.done();

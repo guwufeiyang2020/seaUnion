@@ -13,7 +13,7 @@
 </template>
 <script>
 import Vue from 'vue';
-import MyAppList from './main.vue';
+import MyAppList from './main2.vue';
 
 export default {
   name: 'AppList',

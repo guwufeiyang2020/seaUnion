@@ -43,17 +43,17 @@ export const routers = [
     {
       path: '/appList/:module?/:appId?/:spaceId?',
       name: 'appList',
-      component: () => import ('../pages/appList/appList.vue'),
+      component: () => import ('../pages/appList/appList3.vue'),
       meta: {
         name: '列表页',
       },
     }, {
-      path: '/detail/:module?/:appId?/:spaceId?/:form?',
+      path: '/detail/:module/:appId/:spaceId/:edit/:form?/:node?',
       name: 'detail',
       meta: {
         name: '详情页',
       },
-      component: () => import ('../pages/appDetail/FormMain.vue')
+      component: () => import ('../pages/appDetail/FormMain3.vue')
     },
     {
       path: '/iframContainer',
@@ -71,6 +71,11 @@ export const routers = [
     path: '/login',
     name: 'login',
     component: () => import ('../pages/login/login.vue'),
+  },
+  // 路由未匹配到，则跳到这里
+  {
+    path: '*',
+    component: () => import ('../pages/otherPages/404.vue'),
   },
 
 ];
